@@ -42,6 +42,7 @@ int main(){
                 break;
             case 3:
                 printf("Bye bye ...\n");
+                freeQuestions(head);
                 return 0;
                 break;
             default:
@@ -146,4 +147,16 @@ void playGame(Question* head) {
     }
     
     printf("Final score: %d\n", score);
+}
+
+/*
+Empty the questions linked list.
+*/
+void freeQuestions(struct Question* head) {
+    struct Question* current = head;
+    while (current != NULL) {
+        struct Question* temp = current;
+        current = current->next;
+        free(temp);
+    }
 }
