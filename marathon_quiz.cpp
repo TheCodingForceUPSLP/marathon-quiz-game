@@ -16,3 +16,29 @@ Question* createQuestion();
 void addQuestion(Question** head);
 void playGame(Question* head);
 void freeQuestions(Question* head);
+
+int main(){
+    int choice;
+    while(1){
+        printf("\n============================\n");
+        printf("    MARATHON QUIZ GAME\n");
+        printf("============================\n");
+        printf("1. Exit\n");
+
+        printf("Select an option: ");
+        scanf("%d", &choice);
+        getchar();
+
+        switch (choice)
+        {
+            case 1:
+                printf("Bye bye ...\n");
+                return 0;
+                break;
+            default:
+                printf("Invalid choice!\n");
+                break;
+        }
+    }
+    
+}
