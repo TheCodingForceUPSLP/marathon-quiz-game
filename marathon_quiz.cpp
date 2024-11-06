@@ -1,3 +1,7 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
 #define MAX_STRING 256
 
 typedef struct Question {
