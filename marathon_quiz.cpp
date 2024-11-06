@@ -25,7 +25,8 @@ int main(){
         printf("    MARATHON QUIZ GAME\n");
         printf("============================\n");
         printf("1. Register new question\n");
-        printf("2. Exit\n");
+        printf("2. Play game\n");
+        printf("3. Exit\n");
 
         printf("Select an option: ");
         scanf("%d", &choice);
@@ -37,6 +38,9 @@ int main(){
                 addQuestion(&head);
                 break;
             case 2:
+                playGame(head);
+                break;
+            case 3:
                 printf("Bye bye ...\n");
                 return 0;
                 break;
@@ -93,4 +97,53 @@ void addQuestion(Question** head) {
         current->next = newQuestion;
     }
     printf("\nQuestion added successfully!\n");
+}
+
+/*
+Display specific question with options
+*/
+void displayQuestion(Question* q, int* questionNumber) {
+    printf("\nQuestion %d: %s\n", *questionNumber, q->question);
+    for (int i = 0; i < 3; i++) {
+        printf("%d. %s\n", i + 1, q->options[i]);
+    }
+}
+
+/*
+Logic for marathon game
+*/
+void playGame(Question* head) {
+    int lives = 3;
+    int score = 0;
+    int questionNumber = 1;
+    Question* current = head;
+    
+    printf("\nGame started! You have %d lives.\n", lives);
+    
+    while (current != NULL && lives > 0) {
+        displayQuestion(current, &questionNumber);
+        
+        int answer;
+        printf("Your answer (1-3): ");
+        scanf("%d", &answer);
+        
+        if (answer == current->correct_answer) {
+            printf("Correct!\n");
+            score++;
+        } else {
+            lives--;
+            printf("Wrong! Lives remaining: %d\n", lives);
+        }
+        
+        current = current->next;
+        questionNumber++;
+        
+        if (lives == 0) {
+            printf("\nGame Over! You ran out of lives.\n");
+        } else if (current == NULL) {
+            printf("\nCongratulations! You completed all questions!\n");
+        }
+    }
+    
+    printf("Final score: %d\n", score);
 }
