@@ -13,6 +13,7 @@ typedef struct Question {
 
 // Function prototypes
 Question* createQuestion();
+void showMenu(int *choice);
 void addQuestion(Question** head);
 void playGame(Question* head);
 void freeQuestions(Question* head);
@@ -21,17 +22,7 @@ int main(){
     Question* head = NULL;
     int choice;
     while(1){
-        printf("\n============================\n");
-        printf("    MARATHON QUIZ GAME\n");
-        printf("============================\n");
-        printf("1. Register new question\n");
-        printf("2. Play game\n");
-        printf("3. Exit\n");
-
-        printf("Select an option: ");
-        scanf("%d", &choice);
-        getchar();
-
+        showMenu(&choice);
         switch (choice)
         {
             case 1:
@@ -52,6 +43,21 @@ int main(){
     }
 }
 
+/*
+Display the Main Menu.
+*/
+void showMenu(int *choice){
+    ("\n============================\n");
+    printf("    MARATHON QUIZ GAME\n");
+    printf("============================\n");
+    printf("1. Register new question\n");
+    printf("2. Play game\n");
+    printf("3. Exit\n");
+
+    printf("Select an option: ");
+    scanf("%d", choice);
+    getchar();
+}
 /*
 Create a question in memory.
 */
