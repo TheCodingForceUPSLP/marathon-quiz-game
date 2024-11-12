@@ -6,7 +6,7 @@
 #define MAX_STRING 256
 #define MAX_STRING_NICKNAME 30
 
-//Struct definition
+//Player struct definition
 typedef struct Player{
 	int id;
 	char nickname[MAX_STRING_NICKNAME];
@@ -28,6 +28,12 @@ void showMenu(int *choice);
 void addQuestion(Question** head);
 void playGame(Question* head);
 void freeQuestions(Question* head);
+
+//Player core function definition
+Player* createPlayer(int, char*, float);
+void insertSortedPlayer(Player**, Player*, bool&);
+Player* findPlayerByNickname(Player*, char*);
+void updatePlayerIfHigherScore(Player**,char*,float);
 
 int main(){
     Question* head = NULL;
