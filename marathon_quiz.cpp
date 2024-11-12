@@ -2,7 +2,18 @@
 #include<stdlib.h>
 #include<string.h>
 
+//Const definition
 #define MAX_STRING 256
+#define MAX_STRING_NICKNAME 30
+
+//Struct definition
+typedef struct Player{
+	int id;
+	char nickname[MAX_STRING_NICKNAME];
+	float maxScore;
+	struct Player* next;
+	struct Player* prev;
+}Player;
 
 typedef struct Question {
     char question[MAX_STRING];
