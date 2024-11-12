@@ -11,6 +11,13 @@ typedef struct Question {
     struct Question* next;
 } Question;
 
+typedef struct playedRound{
+	int difficulty; 
+	int playerID;
+	int points;
+	struct playedRound* next;
+}playedRound;
+
 // Function prototypes
 Question* createQuestion();
 void showMenu(int *choice);
