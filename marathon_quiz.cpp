@@ -71,12 +71,14 @@ int main(){
     }
 
     //Player creation section start... Will work when implemented, right now code is unreachable
+
     //Variable definition for general functioning
     Player *playerHead=NULL;
     Player *newPlayer=NULL;
     bool inserted=true;
     int id=1000;
     //End.
+
     //Scoring system
     float score=0;
     switch(1){
@@ -91,6 +93,49 @@ int main(){
         break;
     }
     //End.
+
+    //Nickname reading options, all of them work, just depends on what you like the most :)
+    char playerName[MAX_STRING_NICKNAME]="";
+
+    //this option for reading the string obligates the user to insert a username with the correct length
+    bool correctLength=true;
+    do{
+        fflush(stdin);
+        correctLength=true;
+        printf("Enter your nickname: ");
+        scanf(" %[^\n]",playerName);
+        if(strlen(playerName)>MAX_STRING_NICKNAME){
+            printf("\nName is too long\n");
+            correctLength=false;
+        }
+    }while(!correctLength);
+    //End.
+
+    //this option limits the length of the string in spite of how long the input is
+    //printf("Enter your nickname: ");
+    //fgets(playerName,MAX_STRING_NICKNAME,stdin);
+    //strtok(playerName, "\n");
+    //End.
+
+    //simple way to read the string, no limiters
+    //scanf(" %[^\n]",playerName);
+    //End.
+
+    //End.
+
+    //Player creation
+    newPlayer=createPlayer(id,playerName,score);
+    insertSortedPlayer(&playerHead,newPlayer,inserted);
+    if(inserted){
+        ++id;
+    }
+    updatePlayerIfHigherScore(&playerHead,playerName,score);
+    //End.
+    
+    //Memmory freeing
+    free(playerHead);
+    //End.
+    return 0;
 }
 
 /*
