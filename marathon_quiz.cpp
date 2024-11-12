@@ -191,3 +191,117 @@ void freeQuestions(struct Question* head) {
         free(temp);
     }
 }
+
+//Functions for the main process for player creation
+
+//Node creation
+Player* createPlayer(int id, char *nickname, float score){
+    Player *newPlayer=(Player*)malloc(sizeof(Player));
+    newPlayer->id=id;
+    newPlayer->maxScore=score;
+    strcpy(newPlayer->nickname,nickname);
+    newPlayer->next=NULL;
+    newPlayer->prev=NULL;
+    return newPlayer;
+}
+
+//Insert new player in order from the highest score to the lowest
+void insertSortedPlayer(Player **head, Player *newPlayer, bool &inserted){
+    //Check for repeated nicknames
+    Player *current=*head;
+    if(current!=NULL){
+        do{
+            if(strcmp(newPlayer->nickname,current->nickname)==0){
+                //Condition test
+                //printf("\nNickname already exists\n");
+                //system("pause");
+                //End.
+                inserted=false;
+                return;
+            }
+            current=current->next;
+        }while(current!=NULL);
+    }
+    //End.
+    inserted=true;
+    //this is the case where there is only one node or when the new score is the highest
+    if(*head==NULL || (*head)->maxScore <= newPlayer->maxScore){
+        newPlayer->next=*head;
+        if(*head!=NULL){
+            (*head)->prev=newPlayer;
+        }
+        *head=newPlayer;
+        return;
+    }
+
+    current = *head;
+    //case for the first insertion after the main node
+    if(current->next==NULL){
+        current->next = newPlayer;
+        newPlayer->prev=current;
+        return;
+    }
+
+    //cicle that runs until the next value is smaller than the value being compared
+    while(current->next!=NULL && current->next->maxScore > newPlayer->maxScore){
+        current=current->next;
+    }
+
+    //insertion of the relocated node
+    newPlayer->next=current->next;
+    newPlayer->prev=current;
+    if(current->next!=NULL){
+        current->next->prev=newPlayer;
+    }
+    current->next=newPlayer;
+}
+
+//Function to search for players by using the nickname as a reference
+Player* findPlayerByNickname(Player *head, char *nickname){
+    Player* current=head;
+    while(current!=NULL){
+        if(strcmp(current->nickname,nickname)==0){
+            return current;
+        }
+        current=current->next;
+    }
+    return NULL;
+}
+
+//This function will go into effect when the new score is higher and the player needs to be rearranged
+void updatePlayerIfHigherScore(Player **head, char *nickname, float newScore){
+    //reference adress for locating the data needed
+    Player* reference= findPlayerByNickname(*head,nickname);
+    //in case the player doesn't exist
+    if(reference==NULL){
+        printf("\n Player doesn't exist");
+        return;
+    }
+    //initial condition for the sorting algorithm, the new score must be higher than the previous score, if not do nothing
+    if(newScore>reference->maxScore){
+        //the new score is stored
+        reference->maxScore=newScore;
+
+        //pointers for sorting the nodes
+        Player* current=*head;
+        Player* prevPlayer=reference->prev;
+        Player* nextPlayer=reference->next;
+        //End of pointers
+
+        //this indicates that the node is the first one of the list, no sorting must be made
+        if(prevPlayer==NULL){
+            return;
+        }
+
+        //pointer redirectioning for the list no to get cropped out
+        prevPlayer->next=nextPlayer;
+        if(nextPlayer!=NULL){
+            nextPlayer->prev=prevPlayer;
+        }
+
+        bool inserted=true;
+
+        insertSortedPlayer(head,reference,inserted);
+    }
+    return;
+}
