@@ -69,6 +69,28 @@ int main(){
                 break;
         }
     }
+
+    //Player creation section start... Will work when implemented, right now code is unreachable
+    //Variable definition for general functioning
+    Player *playerHead=NULL;
+    Player *newPlayer=NULL;
+    bool inserted=true;
+    int id=1000;
+    //End.
+    //Scoring system
+    float score=0;
+    switch(1){
+        case 1:
+            score=easyModeMultiplier*1;
+        break;
+        case 2:
+            score=normalModeMultiplier*1;
+        break;
+        case 3:
+            score=godModeMultiplier*1;
+        break;
+    }
+    //End.
 }
 
 /*
@@ -281,7 +303,7 @@ void updatePlayerIfHigherScore(Player **head, char *nickname, float newScore){
         printf("\n Player doesn't exist");
         return;
     }
-    //initial condition for the sorting algorithm, the new score must be higher than the previous score, if not do nothing
+    //initial condition for the sorting algorithm, the new score must be higher than the previous score, if not, do nothing
     if(newScore>reference->maxScore){
         //the new score is stored
         reference->maxScore=newScore;
