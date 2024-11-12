@@ -5,6 +5,10 @@
 //Const definition
 #define MAX_STRING 256
 #define MAX_STRING_NICKNAME 30
+//Scoring criteria const definition
+#define easyModeMultiplier 0.5
+#define normalModeMultiplier 1
+#define godModeMultiplier 2
 
 //Player struct definition
 typedef struct Player{
