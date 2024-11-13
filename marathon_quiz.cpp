@@ -323,24 +323,7 @@ int getLastId(Player* head, int idStart){
 }
 
 //Insert new player in order from the highest score to the lowest
-void insertSortedPlayer(Player **head, Player *newPlayer, bool &inserted){
-    //Check for repeated nicknames
-    Player *current=*head;
-    if(current!=NULL){
-        do{
-            if(strcmp(newPlayer->nickname,current->nickname)==0){
-                //Condition test
-                //printf("\nNickname already exists\n");
-                //system("pause");
-                //End.
-                inserted=false;
-                return;
-            }
-            current=current->next;
-        }while(current!=NULL);
-    }
-    //End.
-    inserted=true;
+void insertSortedPlayer(Player **head, Player *newPlayer){
     //this is the case where there is only one node or when the new score is the highest
     if(*head==NULL || (*head)->maxScore <= newPlayer->maxScore){
         newPlayer->next=*head;
@@ -351,7 +334,7 @@ void insertSortedPlayer(Player **head, Player *newPlayer, bool &inserted){
         return;
     }
 
-    current = *head;
+    Player *current=*head;
     //case for the first insertion after the main node
     if(current->next==NULL){
         current->next = newPlayer;
@@ -400,7 +383,6 @@ void updatePlayerIfHigherScore(Player **head, char *nickname, float newScore){
         reference->maxScore=newScore;
 
         //pointers for sorting the nodes
-        Player* current=*head;
         Player* prevPlayer=reference->prev;
         Player* nextPlayer=reference->next;
         //End of pointers
@@ -416,9 +398,7 @@ void updatePlayerIfHigherScore(Player **head, char *nickname, float newScore){
             nextPlayer->prev=prevPlayer;
         }
 
-        bool inserted=true;
-
-        insertSortedPlayer(head,reference,inserted);
+        insertSortedPlayer(head,reference);
     }
     return;
 }
