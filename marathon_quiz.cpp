@@ -40,6 +40,7 @@ Player* findPlayerByNickname(Player*,char*);
 void updatePlayerIfHigherScore(Player**,char*,float);
 bool isNicknameInList(Player*,char*);
 int getLastId(Player*,int);
+void freePlayers(Player*);
 
 //Scoring system function prototype definition
 float newScore(int,int);
@@ -49,6 +50,7 @@ void nicknameCreation(char*);
 
 int main(){
     Question* head = NULL;
+    Player *playerHead=NULL;
     int choice;
     while(1){
         showMenu(&choice);
@@ -70,6 +72,7 @@ int main(){
             case 4:
                 printf("Bye bye ...\n");
                 freeQuestions(head);
+                freePlayers(playerHead);
                 return 0;
                 break;
             default:
@@ -199,6 +202,16 @@ void freeQuestions(struct Question* head) {
     struct Question* current = head;
     while (current != NULL) {
         struct Question* temp = current;
+        current = current->next;
+        free(temp);
+    }
+}
+
+//Empty all the players of the list
+void freePlayers(struct Player* head) {
+    struct Player* current = head;
+    while (current != NULL) {
+        struct Player* temp = current;
         current = current->next;
         free(temp);
     }
