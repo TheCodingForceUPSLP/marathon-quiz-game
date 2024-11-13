@@ -39,6 +39,13 @@ void insertSortedPlayer(Player**,Player*);
 Player* findPlayerByNickname(Player*,char*);
 void updatePlayerIfHigherScore(Player**,char*,float);
 bool isNicknameInList(Player*,char*);
+int getLastId(Player*,int);
+
+//Scoring system function prototype definition
+float newScore(int,int);
+
+//Nickname creation function prototype definition
+void nicknameCreation(char*);
 
 int main(){
     Question* head = NULL;
