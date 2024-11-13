@@ -30,7 +30,7 @@ typedef struct Question {
 Question* createQuestion();
 void showMenu(int *choice);
 void addQuestion(Question** head);
-void playGame(Question* head);
+void playGame(Question* head, Player**);
 void freeQuestions(Question* head);
 
 //Player core function prototype definition
@@ -60,7 +60,7 @@ int main(){
                 addQuestion(&head);
                 break;
             case 2:
-                playGame(head);
+                playGame(head,&playerHead);
                 break;
             case 3:
                 printf("\n============================\n");
@@ -159,11 +159,16 @@ void displayQuestion(Question* q, int* questionNumber) {
 /*
 Logic for marathon game
 */
-void playGame(Question* head) {
+void playGame(Question* head,Player** playerHead) {
     int lives = 3;
     int score = 0;
     int questionNumber = 1;
     Question* current = head;
+    //Player variables declaration
+    Player *newPlayer=NULL;
+    int id=0;
+    char playerName[MAX_STRING_NICKNAME]="";
+    //End.
     
     printf("\nGame started! You have %d lives.\n", lives);
     
