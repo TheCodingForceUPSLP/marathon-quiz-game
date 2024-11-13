@@ -3,7 +3,7 @@
 #include<string.h>
 
 //Const definition
-#define MAX_STRING 256
+#define MAX_STRING_QUESTION 256
 #define MAX_STRING_NICKNAME 30
 //Scoring criteria const definition
 #define easyModeMultiplier 0.5
@@ -20,8 +20,8 @@ typedef struct Player{
 }Player;
 
 typedef struct Question {
-    char question[MAX_STRING];
-    char options[3][MAX_STRING];
+    char question[MAX_STRING_QUESTION];
+    char options[3][MAX_STRING_QUESTION];
     int correct_answer;
     struct Question* next;
 } Question;
@@ -109,12 +109,12 @@ Question* createQuestion() {
     }
     
     printf("\nEnter the question: ");
-    fgets(newQuestion->question, MAX_STRING, stdin);
+    fgets(newQuestion->question, MAX_STRING_QUESTION, stdin);
     newQuestion->question[strcspn(newQuestion->question, "\n")] = 0;
     
     for (int i = 0; i < 3; i++) {
         printf("Enter option %d: ", i + 1);
-        fgets(newQuestion->options[i], MAX_STRING, stdin);
+        fgets(newQuestion->options[i], MAX_STRING_QUESTION, stdin);
         newQuestion->options[i][strcspn(newQuestion->options[i], "\n")] = 0;
     }
     
