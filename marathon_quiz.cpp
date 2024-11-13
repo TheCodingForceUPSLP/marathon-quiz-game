@@ -168,6 +168,7 @@ void playGame(Question* head,Player** playerHead) {
     Player *newPlayer=NULL;
     int id=0;
     char playerName[MAX_STRING_NICKNAME]="";
+    float totalScore=0;
     //End.
 
     //Player creation
@@ -200,6 +201,9 @@ void playGame(Question* head,Player** playerHead) {
         
         current = current->next;
         questionNumber++;
+
+        //Mode multipliers for final score (1 - Easy, 2 - Normal, 3 - God)
+        totalScore= newScore(score,1);
         
         if (lives == 0) {
             printf("\nGame Over! You ran out of lives.\n");
@@ -223,6 +227,43 @@ void freeQuestions(struct Question* head) {
     }
 }
 
+//New Score function
+float newScore(int correctAnswers, int difficultySelection){
+    //Scoring system
+    float score=0;
+    switch(difficultySelection){
+        case 1:
+            score=easyModeMultiplier*correctAnswers;
+            break;
+        case 2:
+            score=normalModeMultiplier*correctAnswers;
+            break;
+        case 3:
+            score=godModeMultiplier*correctAnswers;
+            break;
+    }
+    return score;
+    //End.
+}
+
+//Nickname creation
+void nicknameCreation(char* playerName){
+    //Player creation
+    //this option for reading the string obligates the user to insert a username with the correct lenght
+    bool correctLength=true;
+    do{
+        fflush(stdin);
+        correctLength=true;
+        printf("Enter your nickname: ");
+        scanf(" %[^\n]",playerName);
+        if(strlen(playerName)>MAX_STRING_NICKNAME){
+            printf("\nName is too long\n");
+            correctLength=false;
+        }
+    }while(!correctLength);
+    //End.
+}
+
 //Empty all the players of the list
 void freePlayers(struct Player* head) {
     struct Player* current = head;
@@ -244,6 +285,17 @@ Player* createPlayer(int id, char *nickname, float score){
     newPlayer->next=NULL;
     newPlayer->prev=NULL;
     return newPlayer;
+}
+
+//Function to get assign the last id of the newest player
+int getLastId(Player* head, int idStart){
+    Player *last=head;
+    int id=idStart;
+    while(last->next!=NULL){
+        ++id;
+        last=last->next;
+    }
+    return ++id;
 }
 
 //Insert new player in order from the highest score to the lowest
