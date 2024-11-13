@@ -206,8 +206,22 @@ void playGame(Question* head,Player** playerHead) {
         totalScore= newScore(score,1);
         
         if (lives == 0) {
+            //Player insertion into the list
+            newPlayer=createPlayer(id,playerName,totalScore);
+            if(!isNicknameInList(*playerHead,playerName)){
+                insertSortedPlayer(playerHead,newPlayer);
+            }
+            updatePlayerIfHigherScore(playerHead,playerName,totalScore);
+            //End.
             printf("\nGame Over! You ran out of lives.\n");
         } else if (current == NULL) {
+            //Player insertion into the list
+            newPlayer=createPlayer(id,playerName,totalScore);
+            if(!isNicknameInList(*playerHead,playerName)){
+                insertSortedPlayer(playerHead,newPlayer);
+            }
+            updatePlayerIfHigherScore(playerHead,playerName,totalScore);
+            //End.
             printf("\nCongratulations! You completed all questions!\n");
         }
     }
@@ -222,6 +236,16 @@ void freeQuestions(struct Question* head) {
     struct Question* current = head;
     while (current != NULL) {
         struct Question* temp = current;
+        current = current->next;
+        free(temp);
+    }
+}
+
+//Empty all the players of the list
+void freePlayers(struct Player* head) {
+    struct Player* current = head;
+    while (current != NULL) {
+        struct Player* temp = current;
         current = current->next;
         free(temp);
     }
@@ -264,16 +288,6 @@ void nicknameCreation(char* playerName){
     //End.
 }
 
-//Empty all the players of the list
-void freePlayers(struct Player* head) {
-    struct Player* current = head;
-    while (current != NULL) {
-        struct Player* temp = current;
-        current = current->next;
-        free(temp);
-    }
-}
-
 //Functions for the main process for player creation
 
 //Node creation
@@ -285,6 +299,16 @@ Player* createPlayer(int id, char *nickname, float score){
     newPlayer->next=NULL;
     newPlayer->prev=NULL;
     return newPlayer;
+}
+
+//Check for repeated nicknames
+bool isNicknameInList(Player* head, char* nickname){
+    Player* reference = findPlayerByNickname(head,nickname);
+    if(reference==NULL){
+        return false;
+    }else{
+        return true;
+    }
 }
 
 //Function to get assign the last id of the newest player
