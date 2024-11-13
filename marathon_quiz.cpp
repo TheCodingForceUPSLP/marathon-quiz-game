@@ -169,6 +169,17 @@ void playGame(Question* head,Player** playerHead) {
     int id=0;
     char playerName[MAX_STRING_NICKNAME]="";
     //End.
+
+    //Player creation
+    //ID assignment
+    if(*playerHead==NULL){
+        id=1000;
+    }else{
+        id= getLastId(*playerHead,1000);
+    }
+    //End.
+    nicknameCreation(playerName);
+    //End.
     
     printf("\nGame started! You have %d lives.\n", lives);
     
