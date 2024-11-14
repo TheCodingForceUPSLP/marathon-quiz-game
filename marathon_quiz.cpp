@@ -19,6 +19,7 @@ typedef struct Player{
 	struct Player* prev;
 }Player;
 
+
 typedef struct Question {
     char question[MAX_STRING_QUESTION];
     char options[3][MAX_STRING_QUESTION];
@@ -30,27 +31,11 @@ typedef struct Question {
 Question* createQuestion();
 void showMenu(int *choice);
 void addQuestion(Question** head);
-void playGame(Question* head, Player**);
+void playGame(Question* head);
 void freeQuestions(Question* head);
-
-//Player core function prototype definition
-Player* createPlayer(int,char*,float);
-void insertSortedPlayer(Player**,Player*);
-Player* findPlayerByNickname(Player*,char*);
-void updatePlayerIfHigherScore(Player**,char*,float);
-bool isNicknameInList(Player*,char*);
-int getLastId(Player*,int);
-void freePlayers(Player*);
-
-//Scoring system function prototype definition
-float newScore(int,int);
-
-//Nickname creation function prototype definition
-void nicknameCreation(char*);
 
 int main(){
     Question* head = NULL;
-    Player *playerHead=NULL;
     int choice;
     while(1){
         showMenu(&choice);
@@ -60,7 +45,7 @@ int main(){
                 addQuestion(&head);
                 break;
             case 2:
-                playGame(head,&playerHead);
+                playGame(head);
                 break;
             case 3:
                 printf("\n============================\n");
@@ -72,7 +57,6 @@ int main(){
             case 4:
                 printf("Bye bye ...\n");
                 freeQuestions(head);
-                freePlayers(playerHead);
                 return 0;
                 break;
             default:
@@ -159,28 +143,11 @@ void displayQuestion(Question* q, int* questionNumber) {
 /*
 Logic for marathon game
 */
-void playGame(Question* head,Player** playerHead) {
+void playGame(Question* head) {
     int lives = 3;
     int score = 0;
     int questionNumber = 1;
     Question* current = head;
-    //Player variables declaration
-    Player *newPlayer=NULL;
-    int id=0;
-    char playerName[MAX_STRING_NICKNAME]="";
-    float totalScore=0;
-    //End.
-
-    //Player creation
-    //ID assignment
-    if(*playerHead==NULL){
-        id=1000;
-    }else{
-        id= getLastId(*playerHead,1000);
-    }
-    //End.
-    nicknameCreation(playerName);
-    //End.
     
     printf("\nGame started! You have %d lives.\n", lives);
     
@@ -201,27 +168,10 @@ void playGame(Question* head,Player** playerHead) {
         
         current = current->next;
         questionNumber++;
-
-        //Mode multipliers for final score (1 - Easy, 2 - Normal, 3 - God)
-        totalScore= newScore(score,1);
         
         if (lives == 0) {
-            //Player insertion into the list
-            newPlayer=createPlayer(id,playerName,totalScore);
-            if(!isNicknameInList(*playerHead,playerName)){
-                insertSortedPlayer(playerHead,newPlayer);
-            }
-            updatePlayerIfHigherScore(playerHead,playerName,totalScore);
-            //End.
             printf("\nGame Over! You ran out of lives.\n");
         } else if (current == NULL) {
-            //Player insertion into the list
-            newPlayer=createPlayer(id,playerName,totalScore);
-            if(!isNicknameInList(*playerHead,playerName)){
-                insertSortedPlayer(playerHead,newPlayer);
-            }
-            updatePlayerIfHigherScore(playerHead,playerName,totalScore);
-            //End.
             printf("\nCongratulations! You completed all questions!\n");
         }
     }
@@ -239,166 +189,4 @@ void freeQuestions(struct Question* head) {
         current = current->next;
         free(temp);
     }
-}
-
-//Empty all the players of the list
-void freePlayers(struct Player* head) {
-    struct Player* current = head;
-    while (current != NULL) {
-        struct Player* temp = current;
-        current = current->next;
-        free(temp);
-    }
-}
-
-//New Score function
-float newScore(int correctAnswers, int difficultySelection){
-    //Scoring system
-    float score=0;
-    switch(difficultySelection){
-        case 1:
-            score=easyModeMultiplier*correctAnswers;
-            break;
-        case 2:
-            score=normalModeMultiplier*correctAnswers;
-            break;
-        case 3:
-            score=godModeMultiplier*correctAnswers;
-            break;
-    }
-    return score;
-    //End.
-}
-
-//Nickname creation
-void nicknameCreation(char* playerName){
-    //Player creation
-    //this option for reading the string obligates the user to insert a username with the correct lenght
-    bool correctLength=true;
-    do{
-        fflush(stdin);
-        correctLength=true;
-        printf("Enter your nickname: ");
-        scanf(" %[^\n]",playerName);
-        if(strlen(playerName)>MAX_STRING_NICKNAME){
-            printf("\nName is too long\n");
-            correctLength=false;
-        }
-    }while(!correctLength);
-    //End.
-}
-
-//Functions for the main process for player creation
-
-//Node creation
-Player* createPlayer(int id, char *nickname, float score){
-    Player *newPlayer=(Player*)malloc(sizeof(Player));
-    newPlayer->id=id;
-    newPlayer->maxScore=score;
-    strcpy(newPlayer->nickname,nickname);
-    newPlayer->next=NULL;
-    newPlayer->prev=NULL;
-    return newPlayer;
-}
-
-//Check for repeated nicknames
-bool isNicknameInList(Player* head, char* nickname){
-    Player* reference = findPlayerByNickname(head,nickname);
-    if(reference==NULL){
-        return false;
-    }else{
-        return true;
-    }
-}
-
-//Function to get assign the last id of the newest player
-int getLastId(Player* head, int idStart){
-    Player *last=head;
-    int id=idStart;
-    while(last->next!=NULL){
-        ++id;
-        last=last->next;
-    }
-    return ++id;
-}
-
-//Insert new player in order from the highest score to the lowest
-void insertSortedPlayer(Player **head, Player *newPlayer){
-    //this is the case where there is only one node or when the new score is the highest
-    if(*head==NULL || (*head)->maxScore <= newPlayer->maxScore){
-        newPlayer->next=*head;
-        if(*head!=NULL){
-            (*head)->prev=newPlayer;
-        }
-        *head=newPlayer;
-        return;
-    }
-
-    Player *current=*head;
-    //case for the first insertion after the main node
-    if(current->next==NULL){
-        current->next = newPlayer;
-        newPlayer->prev=current;
-        return;
-    }
-
-    //cicle that runs until the next value is smaller than the value being compared
-    while(current->next!=NULL && current->next->maxScore > newPlayer->maxScore){
-        current=current->next;
-    }
-
-    //insertion of the relocated node
-    newPlayer->next=current->next;
-    newPlayer->prev=current;
-    if(current->next!=NULL){
-        current->next->prev=newPlayer;
-    }
-    current->next=newPlayer;
-}
-
-//Function to search for players by using the nickname as a reference
-Player* findPlayerByNickname(Player *head, char *nickname){
-    Player* current=head;
-    while(current!=NULL){
-        if(strcmp(current->nickname,nickname)==0){
-            return current;
-        }
-        current=current->next;
-    }
-    return NULL;
-}
-
-//This function will go into effect when the new score is higher and the player needs to be rearranged
-void updatePlayerIfHigherScore(Player **head, char *nickname, float newScore){
-    //reference adress for locating the data needed
-    Player* reference= findPlayerByNickname(*head,nickname);
-    //in case the player doesn't exist
-    if(reference==NULL){
-        printf("\n Player doesn't exist");
-        return;
-    }
-    //initial condition for the sorting algorithm, the new score must be higher than the previous score, if not, do nothing
-    if(newScore>reference->maxScore){
-        //the new score is stored
-        reference->maxScore=newScore;
-
-        //pointers for sorting the nodes
-        Player* prevPlayer=reference->prev;
-        Player* nextPlayer=reference->next;
-        //End of pointers
-
-        //this indicates that the node is the first one of the list, no sorting must be made
-        if(prevPlayer==NULL){
-            return;
-        }
-
-        //pointer redirectioning for the list no to get cropped out
-        prevPlayer->next=nextPlayer;
-        if(nextPlayer!=NULL){
-            nextPlayer->prev=prevPlayer;
-        }
-
-        insertSortedPlayer(head,reference);
-    }
-    return;
 }
