@@ -22,13 +22,14 @@ typedef struct playedRound{
 Question* createQuestion();
 void showMenu(int *choice);
 void addQuestion(Question** head);
-void playGame(Question* head);
+void playGame(Question* head, playedRound **playerRound);
 void freeQuestions(Question* head);
 playedRound* createPlayedRound(int difficulty, int playerID , int points);
 void insertPlayedRound(playedRound **head, playedRound* newRound);
 
 int main(){
     Question* head = NULL;
+    playedRound* playedRoundHead = NULL;
     int choice;
     while(1){
         showMenu(&choice);
@@ -38,7 +39,7 @@ int main(){
                 addQuestion(&head);
                 break;
             case 2:
-                playGame(head);
+                playGame(head, &playedRoundHead);
                 break;
             case 3:
                 printf("\n============================\n");
@@ -136,7 +137,7 @@ void displayQuestion(Question* q, int* questionNumber) {
 /*
 Logic for marathon game
 */
-void playGame(Question* head) {
+void playGame(Question* head, playedRound **playerRound) {
     int lives = 3;
     int score = 0;
     int questionNumber = 1;
@@ -170,6 +171,12 @@ void playGame(Question* head) {
     }
     
     printf("Final score: %d\n", score);
+    /*
+    NOTE:
+    The userID is hardcoded 
+    please modify the call
+    */
+    insertPlayedRound(playerRound, 1, score);
 }
 
 /*
