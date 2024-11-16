@@ -24,6 +24,7 @@ void showMenu(int *choice);
 void addQuestion(Question** head);
 void playGame(Question* head);
 void freeQuestions(Question* head);
+playedRound* createPlayedRound(int difficulty, int playerID , int points);
 
 int main(){
     Question* head = NULL;
@@ -181,3 +182,21 @@ void freeQuestions(struct Question* head) {
         free(temp);
     }
 }
+
+/*
+Create the player round.
+*/
+playedRound* createPlayedRound(int difficulty, int playerID, int points){
+    playedRound *newRound = (playedRound*)malloc(sizeof(playedRound));
+	if (newRound == NULL) {
+        printf("ERROR\n");
+        return NULL;
+    }
+	newRound->difficulty = difficulty;
+	newRound->playerID = playerID; 
+	newRound->points = points;
+	newRound->next = NULL; 
+	
+	return newRound;
+}
+
