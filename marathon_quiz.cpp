@@ -11,15 +11,25 @@ typedef struct Question {
     struct Question* next;
 } Question;
 
+typedef struct PlayedRound{
+	int difficulty; 
+	int playerID;
+	int points;
+	struct PlayedRound* next;
+}PlayedRound;
+
 // Function prototypes
 Question* createQuestion();
 void showMenu(int *choice);
 void addQuestion(Question** head);
-void playGame(Question* head);
+void playGame(Question* head, PlayedRound **playerRound);
 void freeQuestions(Question* head);
+PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
+void insertPlayedRound(PlayedRound **head, int difficulty, int playerID , int points);
 
 int main(){
     Question* head = NULL;
+    PlayedRound* playedRoundHead = NULL;
     int choice;
     while(1){
         showMenu(&choice);
@@ -29,7 +39,7 @@ int main(){
                 addQuestion(&head);
                 break;
             case 2:
-                playGame(head);
+                playGame(head, &playedRoundHead);
                 break;
             case 3:
                 printf("\n============================\n");
@@ -127,7 +137,7 @@ void displayQuestion(Question* q, int* questionNumber) {
 /*
 Logic for marathon game
 */
-void playGame(Question* head) {
+void playGame(Question* head, PlayedRound **playerRound) {
     int lives = 3;
     int score = 0;
     int questionNumber = 1;
@@ -161,6 +171,12 @@ void playGame(Question* head) {
     }
     
     printf("Final score: %d\n", score);
+    /*
+    NOTE:
+    The difficulty and userID are hardcoded 
+    please modify the call
+    */
+    insertPlayedRound(playerRound, 1, 1, score);
 }
 
 /*
@@ -174,3 +190,45 @@ void freeQuestions(struct Question* head) {
         free(temp);
     }
 }
+
+/*
+Create the player round.
+*/
+PlayedRound* createPlayedRound(int difficulty, int playerID, int points){
+    PlayedRound *newRound = (PlayedRound*)malloc(sizeof(PlayedRound));
+	if (newRound == NULL) {
+        printf("ERROR\n");
+        return NULL;
+    }
+	newRound->difficulty = difficulty;
+	newRound->playerID = playerID; 
+	newRound->points = points;
+	newRound->next = NULL; 
+	
+	return newRound;
+}
+
+/*
+Insert player round sorted by difficulty (1,2,3) and the points (ascending order).
+*/
+void insertPlayedRound(PlayedRound **head, int difficulty, int playerID, int points){
+	PlayedRound *newRound = createPlayedRound(difficulty, playerID, points);  
+	//Go through the list and find the position to insert the node
+	if(*head ==NULL || (*head)->difficulty > newRound->difficulty 
+	    							&& (*head)->points < newRound->points){
+		newRound->next = *head;
+		*head = newRound;
+		return; 
+	}
+	PlayedRound *current = *head;
+	while(current->next !=NULL && current->next->difficulty < newRound->difficulty 
+									&& current->next->points >= newRound->points){
+		current = current->next;
+	}
+	newRound->next = current->next;
+	current->next = newRound; 
+	
+}
+
+	
+
