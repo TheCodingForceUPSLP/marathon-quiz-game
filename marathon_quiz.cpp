@@ -11,25 +11,25 @@ typedef struct Question {
     struct Question* next;
 } Question;
 
-typedef struct playedRound{
+typedef struct PlayedRound{
 	int difficulty; 
 	int playerID;
 	int points;
-	struct playedRound* next;
-}playedRound;
+	struct PlayedRound* next;
+}PlayedRound;
 
 // Function prototypes
 Question* createQuestion();
 void showMenu(int *choice);
 void addQuestion(Question** head);
-void playGame(Question* head, playedRound **playerRound);
+void playGame(Question* head, PlayedRound **playerRound);
 void freeQuestions(Question* head);
-playedRound* createPlayedRound(int difficulty, int playerID , int points);
-void insertPlayedRound(playedRound **head, playedRound* newRound);
+PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
+void insertPlayedRound(PlayedRound **head, PlayedRound* newRound);
 
 int main(){
     Question* head = NULL;
-    playedRound* playedRoundHead = NULL;
+    PlayedRound* playedRoundHead = NULL;
     int choice;
     while(1){
         showMenu(&choice);
@@ -137,7 +137,7 @@ void displayQuestion(Question* q, int* questionNumber) {
 /*
 Logic for marathon game
 */
-void playGame(Question* head, playedRound **playerRound) {
+void playGame(Question* head, PlayedRound **playerRound) {
     int lives = 3;
     int score = 0;
     int questionNumber = 1;
@@ -194,8 +194,8 @@ void freeQuestions(struct Question* head) {
 /*
 Create the player round.
 */
-playedRound* createPlayedRound(int difficulty, int playerID, int points){
-    playedRound *newRound = (playedRound*)malloc(sizeof(playedRound));
+PlayedRound* createPlayedRound(int difficulty, int playerID, int points){
+    PlayedRound *newRound = (PlayedRound*)malloc(sizeof(PlayedRound));
 	if (newRound == NULL) {
         printf("ERROR\n");
         return NULL;
@@ -211,8 +211,8 @@ playedRound* createPlayedRound(int difficulty, int playerID, int points){
 /*
 Insert player round sorted by difficulty (1,2,3) and the points (ascending order).
 */
-void insertPlayedRound(playedRound **head, playedRound* newRound){
-	playedRound *newRound = createPlayedRound(difficulty, playerID, points);  
+void insertPlayedRound(PlayedRound **head, PlayedRound* newRound){
+	PlayedRound *newRound = createPlayedRound(difficulty, playerID, points);  
 	//Go through the list and find the position to insert the node
 	if(*head ==NULL || (*head)->newRound->difficulty > newRound->difficulty 
 	    							&& (*head)->newRound->points < newRound->points){
@@ -220,7 +220,7 @@ void insertPlayedRound(playedRound **head, playedRound* newRound){
 		*head = newRound;
 		return; 
 	}
-	playedRound *current = *head;
+	PlayedRound *current = *head;
 	while(current->next !=NULL && current->next->difficulty < newRound->difficulty 
 									&& current->next->points >= newRound->points){
 		current = current->next;
