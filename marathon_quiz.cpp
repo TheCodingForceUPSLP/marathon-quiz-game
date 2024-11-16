@@ -25,6 +25,7 @@ void addQuestion(Question** head);
 void playGame(Question* head);
 void freeQuestions(Question* head);
 playedRound* createPlayedRound(int difficulty, int playerID , int points);
+void insertPlayedRound(playedRound **head, playedRound* newRound);
 
 int main(){
     Question* head = NULL;
@@ -199,4 +200,28 @@ playedRound* createPlayedRound(int difficulty, int playerID, int points){
 	
 	return newRound;
 }
+
+/*
+Insert player round sorted by difficulty (1,2,3) and the points (ascending order).
+*/
+void insertPlayedRound(playedRound **head, playedRound* newRound){
+	playedRound *newRound = createPlayedRound(difficulty, playerID, points);  
+	//Go through the list and find the position to insert the node
+	if(*head ==NULL || (*head)->newRound->difficulty > newRound->difficulty 
+	    							&& (*head)->newRound->points < newRound->points){
+		newRound->next = *head;
+		*head = newRound;
+		return; 
+	}
+	playedRound *current = *head;
+	while(current->next !=NULL && current->next->difficulty < newRound->difficulty 
+									&& current->next->points >= newRound->points){
+		current = current->next;
+	}
+	newRound->next = current->next;
+	current->next = newRound; 
+	
+}
+
+	
 
