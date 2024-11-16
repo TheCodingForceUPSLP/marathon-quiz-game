@@ -25,7 +25,7 @@ void addQuestion(Question** head);
 void playGame(Question* head, PlayedRound **playerRound);
 void freeQuestions(Question* head);
 PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
-void insertPlayedRound(PlayedRound **head, PlayedRound* newRound);
+void insertPlayedRound(PlayedRound **head, int difficulty, int playerID , int points);
 
 int main(){
     Question* head = NULL;
@@ -173,10 +173,10 @@ void playGame(Question* head, PlayedRound **playerRound) {
     printf("Final score: %d\n", score);
     /*
     NOTE:
-    The userID is hardcoded 
+    The difficulty and userID are hardcoded 
     please modify the call
     */
-    insertPlayedRound(playerRound, 1, score);
+    insertPlayedRound(playerRound, 1, 1, score);
 }
 
 /*
@@ -211,11 +211,11 @@ PlayedRound* createPlayedRound(int difficulty, int playerID, int points){
 /*
 Insert player round sorted by difficulty (1,2,3) and the points (ascending order).
 */
-void insertPlayedRound(PlayedRound **head, PlayedRound* newRound){
+void insertPlayedRound(PlayedRound **head, int difficulty, int playerID, int points){
 	PlayedRound *newRound = createPlayedRound(difficulty, playerID, points);  
 	//Go through the list and find the position to insert the node
-	if(*head ==NULL || (*head)->newRound->difficulty > newRound->difficulty 
-	    							&& (*head)->newRound->points < newRound->points){
+	if(*head ==NULL || (*head)->difficulty > newRound->difficulty 
+	    							&& (*head)->points < newRound->points){
 		newRound->next = *head;
 		*head = newRound;
 		return; 
