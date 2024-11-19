@@ -29,9 +29,9 @@ typedef struct Question {
 // Function prototypes
 Question* createQuestion();
 void showMenu(int *choice);
-void addQuestion(Question** head);
-void playGame(Question* head, Player**);
-void freeQuestions(Question* head);
+void addQuestion(Question** questionHead);
+void playGame(Question* questionHead, Player**);
+void freeQuestions(Question* questionHead);
 
 //Player core function prototype definition
 Player* createPlayer(int,char*,float);
@@ -49,7 +49,7 @@ float newScore(int,int);
 void nicknameCreation(char*);
 
 int main(){
-    Question* head = NULL;
+    Question* questionHead = NULL;
     Player *playerHead=NULL;
     int choice;
     while(1){
@@ -57,10 +57,10 @@ int main(){
         switch (choice)
         {
             case 1:
-                addQuestion(&head);
+                addQuestion(&questionHead);
                 break;
             case 2:
-                playGame(head,&playerHead);
+                playGame(questionHead,&playerHead);
                 break;
             case 3:
                 printf("\n============================\n");
@@ -71,7 +71,7 @@ int main(){
                 break;
             case 4:
                 printf("Bye bye ...\n");
-                freeQuestions(head);
+                freeQuestions(questionHead);
                 freePlayers(playerHead);
                 return 0;
                 break;
@@ -131,13 +131,13 @@ Question* createQuestion() {
 /*
 Add a question into the simple linked list
 */
-void addQuestion(Question** head) {
+void addQuestion(Question** questionHead) {
     Question* newQuestion = createQuestion();
     
-    if (*head == NULL) {
-        *head = newQuestion;
+    if (*questionHead == NULL) {
+        *questionHead = newQuestion;
     } else {
-        Question* current = *head;
+        Question* current = *questionHead;
         while (current->next != NULL) {
             current = current->next;
         }
@@ -159,11 +159,11 @@ void displayQuestion(Question* q, int* questionNumber) {
 /*
 Logic for marathon game
 */
-void playGame(Question* head,Player** playerHead) {
+void playGame(Question* questionHead,Player** playerHead) {
     int lives = 3;
     int score = 0;
     int questionNumber = 1;
-    Question* current = head;
+    Question* current = questionHead;
     //Player variables declaration
     Player *newPlayer=NULL;
     int id=0;
@@ -232,8 +232,8 @@ void playGame(Question* head,Player** playerHead) {
 /*
 Empty the questions linked list.
 */
-void freeQuestions(struct Question* head) {
-    struct Question* current = head;
+void freeQuestions(struct Question* questionHead) {
+    struct Question* current = questionHead;
     while (current != NULL) {
         struct Question* temp = current;
         current = current->next;
