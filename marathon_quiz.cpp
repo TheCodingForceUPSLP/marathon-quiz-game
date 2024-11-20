@@ -178,6 +178,8 @@ void deleteQuestionById(Question **head, int id) {
     	return;
 	}
     
+    current = *head;
+    
     while (current->id != id) {
         previous = current;
         current = current->next;
