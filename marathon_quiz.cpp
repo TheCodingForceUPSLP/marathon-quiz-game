@@ -67,6 +67,7 @@ int main(){
     Player *playerHead=NULL;
     PlayedRound* playedRoundHead = NULL;
     int choice;
+    int questionId = 0;
     while(1){
         showMenu(&choice);
         switch (choice)
@@ -78,10 +79,10 @@ int main(){
                 playGame(questionHead,&playerHead, &playedRoundHead);
                 break;
             case 3:
-            	int questionId = 0;
             	printf("\nEnter the id of the question to delete: ");
             	scanf("%d",&questionId);
-            	deleteQuestionById(questionHead, questionId);
+            	deleteQuestionById(&questionHead, questionId);
+            	break;
             case 4:
                 printf("\n============================\n");
                 printf("    PROGRAM CREDITS\n");
@@ -153,7 +154,7 @@ Question* createQuestion() {
 Search for specific question by id
 */
 Question* searchQuestion(Question *questionHead, int questionId){
-    if (head == NULL) return NULL;
+    if (questionHead == NULL) return NULL;
 
     Question *aux = questionHead;
 
