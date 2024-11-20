@@ -35,9 +35,10 @@ typedef struct PlayedRound{
 }PlayedRound;
 
 // Function prototypes
-Question* createQuestion();
+Question* createQuestion(int questionId);
 Question* searchQuestion(Question *questionHead, int questionId);
 void deleteQuestionById(Question **questionHead, int questionId);
+int getLastQuestionId(Question* questionHead, int idStart);
 void showMenu(int *choice);
 
 PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
@@ -123,7 +124,7 @@ void showMenu(int *choice){
 /*
 Create a question in memory.
 */
-Question* createQuestion() {
+Question* createQuestion(int questionId) {
     Question* newQuestion = (Question*)malloc(sizeof(Question));
     if (newQuestion == NULL) {
         printf("Memory allocation failed!\n");
@@ -145,7 +146,7 @@ Question* createQuestion() {
         scanf("%d", &newQuestion->correct_answer);
         getchar();
     } while (newQuestion->correct_answer < 1 || newQuestion->correct_answer > 3);
-    
+    newQuestion->id = questionId;
     newQuestion->next = NULL;
     return newQuestion;
 }
@@ -204,10 +205,25 @@ void deleteQuestionById(Question **questionHead, int questionId) {
 }
 
 /*
+Function to get assign the last id of the newest question
+*/
+int getLastQuestionId(Question* questionHead, int idStart){
+	if(questionHead == NULL) return idStart;
+	Question *last=questionHead;
+    int id=idStart;
+    while(last->next!=NULL){
+        ++id;
+        last=last->next;
+    }
+    return ++id;
+}
+
+/*
 Add a question into the simple linked list
 */
 void addQuestion(Question** questionHead) {
-    Question* newQuestion = createQuestion();
+	int questionId = getLastQuestionId(*questionHead, 1);
+    Question* newQuestion = createQuestion(questionId);
     
     if (*questionHead == NULL) {
         *questionHead = newQuestion;
