@@ -20,7 +20,8 @@ typedef struct Player{
 }Player;
 
 typedef struct Question {
-    char question[MAX_STRING_QUESTION];
+    int id;
+	char question[MAX_STRING_QUESTION];
     char options[3][MAX_STRING_QUESTION];
     int correct_answer;
     struct Question* next;
@@ -34,7 +35,10 @@ typedef struct PlayedRound{
 }PlayedRound;
 
 // Function prototypes
-Question* createQuestion();
+Question* createQuestion(int questionId);
+Question* searchQuestion(Question *questionHead, int questionId);
+void deleteQuestionById(Question **questionHead, int questionId);
+int getLastQuestionId(Question* questionHead, int idStart);
 void showMenu(int *choice);
 
 PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
@@ -64,6 +68,7 @@ int main(){
     Player *playerHead=NULL;
     PlayedRound* playedRoundHead = NULL;
     int choice;
+    int questionId = 0;
     while(1){
         showMenu(&choice);
         switch (choice)
@@ -75,13 +80,18 @@ int main(){
                 playGame(questionHead,&playerHead, &playedRoundHead);
                 break;
             case 3:
+            	printf("\nEnter the id of the question to delete: ");
+            	scanf("%d",&questionId);
+            	deleteQuestionById(&questionHead, questionId);
+            	break;
+            case 4:
                 printf("\n============================\n");
                 printf("    PROGRAM CREDITS\n");
                 printf("============================\n");
                 printf("Marathon Quiz Game\n");
                 printf("Developed by E13A Group\n\n");
                 break;
-            case 4:
+            case 5:
                 printf("Bye bye ...\n");
                 freeQuestions(questionHead);
                 freePlayers(playerHead);
@@ -103,8 +113,9 @@ void showMenu(int *choice){
     printf("============================\n");
     printf("1. Register new question\n");
     printf("2. Play game\n");
-    printf("3. Show credits\n");
-    printf("4. Exit\n");
+    printf("3. Delete question\n");
+    printf("4. Show credits\n");
+    printf("5. Exit\n");
 
     printf("Select an option: ");
     scanf("%d", choice);
@@ -113,7 +124,7 @@ void showMenu(int *choice){
 /*
 Create a question in memory.
 */
-Question* createQuestion() {
+Question* createQuestion(int questionId) {
     Question* newQuestion = (Question*)malloc(sizeof(Question));
     if (newQuestion == NULL) {
         printf("Memory allocation failed!\n");
@@ -135,16 +146,86 @@ Question* createQuestion() {
         scanf("%d", &newQuestion->correct_answer);
         getchar();
     } while (newQuestion->correct_answer < 1 || newQuestion->correct_answer > 3);
-    
+    newQuestion->id = questionId;
     newQuestion->next = NULL;
     return newQuestion;
+}
+
+/*
+Search for specific question by id
+*/
+Question* searchQuestion(Question *questionHead, int questionId){
+    if (questionHead == NULL) return NULL;
+
+    Question *aux = questionHead;
+
+    while (aux != NULL) {
+        if (aux->id == questionId) return aux;
+        aux = aux->next;
+    }
+
+    printf("ID %d entered is not found\n", questionId);
+    return NULL;
+}
+
+/*
+Delete specific question by id
+*/
+void deleteQuestionById(Question **questionHead, int questionId) {
+    if (*questionHead == NULL) return;
+
+    Question *current = *questionHead;
+    Question *previous = NULL;
+
+    // Searches for the node with the specified ID
+    current = searchQuestion(*questionHead, questionId);
+    
+    // If the ID is not found, terminate
+    if (current == NULL){
+    	printf("\nThe question with the entered id was not found\n");
+    	return;
+	}
+    
+    current = *questionHead;
+    
+    while (current->id != questionId) {
+        previous = current;
+        current = current->next;
+    }
+
+    // If the node to be deleted is the first node to be deleted
+    if (previous == NULL) {
+        *questionHead = current->next;
+    } else {
+        previous->next = current->next;
+    }
+
+    // Frees the memory of the deleted node
+    free(current);
+    
+    printf("\nThe question was correctly deleted");
+}
+
+/*
+Function to get assign the last id of the newest question
+*/
+int getLastQuestionId(Question* questionHead, int idStart){
+	if(questionHead == NULL) return idStart;
+	Question *last=questionHead;
+    int id=idStart;
+    while(last->next!=NULL){
+        ++id;
+        last=last->next;
+    }
+    return ++id;
 }
 
 /*
 Add a question into the simple linked list
 */
 void addQuestion(Question** questionHead) {
-    Question* newQuestion = createQuestion();
+	int questionId = getLastQuestionId(*questionHead, 1);
+    Question* newQuestion = createQuestion(questionId);
     
     if (*questionHead == NULL) {
         *questionHead = newQuestion;
