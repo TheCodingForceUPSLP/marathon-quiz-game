@@ -36,8 +36,8 @@ typedef struct PlayedRound{
 
 // Function prototypes
 Question* createQuestion();
-Question* searchQuestion(Question *head, int id);
-void deleteQuestionById(Question **head, int id);
+Question* searchQuestion(Question *questionHead, int questionId);
+void deleteQuestionById(Question **questionHead, int questionId);
 void showMenu(int *choice);
 
 PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
@@ -152,31 +152,31 @@ Question* createQuestion() {
 /*
 Search for specific question by id
 */
-Question* searchQuestion(Question *head, int id){
+Question* searchQuestion(Question *questionHead, int questionId){
     if (head == NULL) return NULL;
 
-    Question *aux = head;
+    Question *aux = questionHead;
 
     while (aux != NULL) {
-        if (aux->id == id) return aux;
+        if (aux->id == questionId) return aux;
         aux = aux->next;
     }
 
-    printf("ID %d entered is not found\n", id);
+    printf("ID %d entered is not found\n", questionId);
     return NULL;
 }
 
 /*
 Delete specific question by id
 */
-void deleteQuestionById(Question **head, int id) {
-    if (*head == NULL) return;
+void deleteQuestionById(Question **questionHead, int questionId) {
+    if (*questionHead == NULL) return;
 
-    Question *current = *head;
+    Question *current = *questionHead;
     Question *previous = NULL;
 
     // Searches for the node with the specified ID
-    current = searchQuestion(*head, id);
+    current = searchQuestion(*questionHead, questionId);
     
     // If the ID is not found, terminate
     if (current == NULL){
@@ -184,16 +184,16 @@ void deleteQuestionById(Question **head, int id) {
     	return;
 	}
     
-    current = *head;
+    current = *questionHead;
     
-    while (current->id != id) {
+    while (current->id != questionId) {
         previous = current;
         current = current->next;
     }
 
     // If the node to be deleted is the first node to be deleted
     if (previous == NULL) {
-        *head = current->next;
+        *questionHead = current->next;
     } else {
         previous->next = current->next;
     }
