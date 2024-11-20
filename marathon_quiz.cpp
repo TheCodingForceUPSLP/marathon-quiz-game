@@ -202,6 +202,8 @@ void deleteQuestionById(Question **questionHead, int questionId) {
 
     // Frees the memory of the deleted node
     free(current);
+    
+    printf("\nThe question was correctly deleted");
 }
 
 /*
