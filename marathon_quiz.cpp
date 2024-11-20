@@ -156,7 +156,7 @@ Question* searchQuestion(Question *head, int id){
         aux = aux->next;
     }
 
-    printf("No se encuentra el ID %d ingresado\n", id);
+    printf("ID %d entered is not found\n", id);
     return NULL;
 }
 
