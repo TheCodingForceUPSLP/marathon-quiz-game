@@ -37,6 +37,7 @@ typedef struct PlayedRound{
 // Function prototypes
 Question* createQuestion();
 Question* searchQuestion(Question *head, int id);
+void deleteQuestionById(Question **head, int id);
 void showMenu(int *choice);
 
 PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
@@ -157,6 +158,40 @@ Question* searchQuestion(Question *head, int id){
 
     printf("No se encuentra el ID %d ingresado\n", id);
     return NULL;
+}
+
+/*
+Delete specific question by id
+*/
+void deleteQuestionById(Question **head, int id) {
+    if (*head == NULL) return;
+
+    Question *current = *head;
+    Question *previous = NULL;
+
+    // Searches for the node with the specified ID
+    current = searchQuestion(*head, id);
+    
+    // If the ID is not found, terminate
+    if (current == NULL){
+    	printf("\nThe question with the entered id was not found\n");
+    	return;
+	}
+    
+    while (current->id != id) {
+        previous = current;
+        current = current->next;
+    }
+
+    // If the node to be deleted is the first node to be deleted
+    if (previous == NULL) {
+        *head = current->next;
+    } else {
+        previous->next = current->next;
+    }
+
+    // Frees the memory of the deleted node
+    free(current);
 }
 
 /*
