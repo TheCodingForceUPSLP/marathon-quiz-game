@@ -20,7 +20,8 @@ typedef struct Player{
 }Player;
 
 typedef struct Question {
-    char question[MAX_STRING_QUESTION];
+    int id;
+	char question[MAX_STRING_QUESTION];
     char options[3][MAX_STRING_QUESTION];
     int correct_answer;
     struct Question* next;
