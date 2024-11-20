@@ -78,13 +78,18 @@ int main(){
                 playGame(questionHead,&playerHead, &playedRoundHead);
                 break;
             case 3:
+            	int questionId = 0;
+            	printf("\nEnter the id of the question to delete: ");
+            	scanf("%d",&questionId);
+            	deleteQuestionById(questionHead, questionId);
+            case 4:
                 printf("\n============================\n");
                 printf("    PROGRAM CREDITS\n");
                 printf("============================\n");
                 printf("Marathon Quiz Game\n");
                 printf("Developed by E13A Group\n\n");
                 break;
-            case 4:
+            case 5:
                 printf("Bye bye ...\n");
                 freeQuestions(questionHead);
                 freePlayers(playerHead);
@@ -106,8 +111,9 @@ void showMenu(int *choice){
     printf("============================\n");
     printf("1. Register new question\n");
     printf("2. Play game\n");
-    printf("3. Show credits\n");
-    printf("4. Exit\n");
+    printf("3. Delete question\n");
+    printf("4. Show credits\n");
+    printf("5. Exit\n");
 
     printf("Select an option: ");
     scanf("%d", choice);
