@@ -36,6 +36,7 @@ typedef struct PlayedRound{
 
 // Function prototypes
 Question* createQuestion();
+Question* searchQuestion(Question *head, int id);
 void showMenu(int *choice);
 
 PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
@@ -139,6 +140,23 @@ Question* createQuestion() {
     
     newQuestion->next = NULL;
     return newQuestion;
+}
+
+/*
+Search for specific question by id
+*/
+Question* searchQuestion(Question *head, int id){
+    if (head == NULL) return NULL;
+
+    Question *aux = head;
+
+    while (aux != NULL) {
+        if (aux->id == id) return aux;
+        aux = aux->next;
+    }
+
+    printf("No se encuentra el ID %d ingresado\n", id);
+    return NULL;
 }
 
 /*
