@@ -176,6 +176,11 @@ Question* createQuestion(int questionId) {
         scanf("%d", &newQuestion->correct_answer);
         getchar();
     } while (newQuestion->correct_answer < 1 || newQuestion->correct_answer > 3);
+    
+    int category;
+    categoryMenu(&category);
+    newQuestion->category=category;
+    
     newQuestion->id = questionId;
     newQuestion->next = NULL;
     return newQuestion;
