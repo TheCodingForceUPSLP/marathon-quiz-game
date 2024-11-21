@@ -75,6 +75,7 @@ void nicknameCreation(char*);
 
 //Category functions
 void categoryMenu(int *category);
+void displayQuestionsByCategory(Question* head, int category);
 
 int main(){
     Question* questionHead = NULL;
@@ -284,7 +285,22 @@ void displayQuestion(Question* q, int* questionNumber) {
         printf("%d. %s\n", i + 1, q->options[i]);
     }
 }
-
+/*
+Display question by specific category
+*/
+void displayQuestionsByCategory(Question* head, int category){
+	Question * current= head;
+	int found=0;
+	while (current != NULL){
+		if(current->category==category){
+			printf("\n%c %s\n", 254, current->question);
+			found=1;
+		}
+		current= current->next;
+	}
+	if(found!=1) printf("\nThere are no questions in this category\n" );
+	printf("\n");
+}
 /*
 Logic for marathon game
 */
