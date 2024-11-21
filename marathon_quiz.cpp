@@ -278,6 +278,7 @@ void addQuestion(Question** questionHead) {
 Display specific question with options
 */
 void displayQuestion(Question* q, int* questionNumber) {
+    printf("\nCategory:  %s\n", categoryNames[(q->category)-1]);
     printf("\nQuestion %d: %s\n", *questionNumber, q->question);
     for (int i = 0; i < 3; i++) {
         printf("%d. %s\n", i + 1, q->options[i]);
