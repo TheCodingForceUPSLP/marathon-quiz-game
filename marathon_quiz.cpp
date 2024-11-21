@@ -36,7 +36,7 @@ typedef struct PlayedRound{
 // Function prototypes
 Question* createQuestion();
 void showMenu(int *choice);
-
+void deletePlayer(Player** head, int playerId, char* nickname);
 PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
 void insertPlayedRound(PlayedRound **head, int difficulty, int playerID , int points);
   
@@ -81,7 +81,18 @@ int main(){
                 printf("Marathon Quiz Game\n");
                 printf("Developed by E13A Group\n\n");
                 break;
-            case 4:
+
+
+                 case 4:
+            	{
+				
+            	int playerId;
+        		char nickname[MAX_STRING_NICKNAME];
+            	deletePlayer(&playerHead, playerId, nickname);
+                }
+            	break;
+            	
+            case 5:
                 printf("Bye bye ...\n");
                 freeQuestions(questionHead);
                 freePlayers(playerHead);
@@ -460,4 +471,48 @@ void updatePlayerIfHigherScore(Player **head, char *nickname, float newScore){
         insertSortedPlayer(head,reference);
     }
     return;
+}
+
+void deletePlayer(Player** head, int playerId, char* nickname){
+if (*head == NULL) {
+        printf("There's no player to delete\n");
+        return;
+    }
+
+    Player* current = *head;
+
+    // Prompt user for the ID of the player to delete
+    printf("What's the id of the poor soul you want to delete?\n");
+    scanf("%i", &playerId);
+
+
+    while (current != NULL) {
+        if (current->id == playerId) {
+     
+     
+            if (current == *head) {
+                *head = current->next;
+                if (*head != NULL) {
+                    (*head)->prev = NULL;
+                }
+            } 
+       
+            else {
+                if (current->prev != NULL) {
+                    current->prev->next = current->next;
+                }
+                if (current->next != NULL) {
+                    current->next->prev = current->prev;
+                }
+            }
+            
+            free(current);
+            printf("The player %i was successfully deleted. RIP %s.\n", playerId, nickname);
+            return;
+        }
+        current = current->next;
+    }
+
+    // If no player with the given ID was found
+    printf("No player with ID %i found.\n", playerId);
 }
