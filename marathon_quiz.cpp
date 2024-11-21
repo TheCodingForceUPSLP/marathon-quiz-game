@@ -73,6 +73,9 @@ float newScore(int,int);
 //Nickname creation function prototype definition
 void nicknameCreation(char*);
 
+//Category functions
+void categoryMenu(int *category);
+
 int main(){
     Question* questionHead = NULL;
     Player *playerHead=NULL;
@@ -130,6 +133,23 @@ void showMenu(int *choice){
     printf("Select an option: ");
     scanf("%d", choice);
     getchar();
+}
+/*
+    Display the category selection menu
+*/
+void categoryMenu(int *category){
+    printf("\n1. Mexican History\n");
+    printf("2. General History\n");
+    printf("3. Geography\n");
+    printf("4. Sports, Movies, Books, Art\n");
+    printf("5. Science and Biology\n");
+    printf("6. Spanish, Philosophy and Religion\n");
+    
+    do{
+        printf("Select a category (1-6): ");
+        scanf("%d", category); 
+		while(getchar() != '\n');
+    }while(*category < 1 || *category > 6); 
 }
 /*
 Create a question in memory.
