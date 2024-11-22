@@ -41,6 +41,7 @@ void updatePlayerIfHigherScore(Player**,char*,float);
 bool isNicknameInList(Player*,char*);
 int getLastId(Player*,int);
 void freePlayers(Player*);
+void deletePlayer(Player** head, int playerId, char* nickname);
 
 //Scoring system function prototype definition
 float newScore(int,int);
@@ -401,4 +402,44 @@ void updatePlayerIfHigherScore(Player **head, char *nickname, float newScore){
         insertSortedPlayer(head,reference);
     }
     return;
+}
+
+void deletePlayer(Player** head, int playerId, char* nickname){
+    if (*head == NULL) {
+        printf("There's no player to delete\n");
+        return;
+    }
+
+    Player* current = *head;
+
+    // Prompt user for the ID of the player to delete
+    printf("What's the id of the poor soul you want to delete?\n");
+    scanf("%i", &playerId);
+
+    while (current != NULL) {
+        if (current->id == playerId) {
+            
+            if (current == *head) {
+                *head = current->next;
+                if (*head != NULL) {
+                    (*head)->prev = NULL;
+                }
+            } else {
+                if (current->prev != NULL) {
+                    current->prev->next = current->next;
+                }
+                if (current->next != NULL) {
+                    current->next->prev = current->prev;
+                }
+            }
+            
+            free(current);
+            printf("The player %i was successfully deleted. RIP %s.\n", playerId, nickname);
+            return;
+        }
+        current = current->next;
+    }
+
+    // If no player with the given ID was found
+    printf("No player with ID %i found.\n", playerId);
 }
