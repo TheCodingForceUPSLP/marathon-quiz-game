@@ -458,8 +458,7 @@ void deletePlayer(Player** head){
 
 void changeName(Player* head) {
     int playerId;
-    const char* newNickname;
-    char* nickname;
+    char nickname[MAX_STRING_NICKNAME];
    //checks if theres already players
     if (head == NULL) {
         printf("There's no player to rename\n");
@@ -483,10 +482,9 @@ void changeName(Player* head) {
     }
     //if the id exist now it asks you the name
     printf("How wants this person to be called?:\n ");
-    scanf(" %[^\n]", nickname);
+    fgets(nickname, MAX_STRING_NICKNAME, stdin);
  	//this parts lets copy an especific number of characters and lets space for the NULL character
-    strncpy(current->nickname, nickname, MAX_STRING_NICKNAME - 1);
-    current->nickname[MAX_STRING_NICKNAME - 1] = '\0';
+    strcpy(nickname, current->nickname);
 
     printf("The person with the ID %d will be known as %s now\n", playerId, current->nickname);
 }
