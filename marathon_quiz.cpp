@@ -64,13 +64,19 @@ int main(){
                 playGame(questionHead,&playerHead);
                 break;
             case 3:
+                printf("Sample rename player\n");
+                break;
+            case 4:
+                deletePlayer(&playerHead);        
+                break;
+            case 5:
                 printf("\n============================\n");
                 printf("    PROGRAM CREDITS\n");
                 printf("============================\n");
                 printf("Marathon Quiz Game\n");
                 printf("Developed by E13A Group\n\n");
                 break;
-            case 4:
+            case 6:
                 printf("Bye bye ...\n");
                 freeQuestions(questionHead);
                 freePlayers(playerHead);
@@ -92,8 +98,10 @@ void showMenu(int *choice){
     printf("============================\n");
     printf("1. Register new question\n");
     printf("2. Play game\n");
-    printf("3. Show credits\n");
-    printf("4. Exit\n");
+    printf("3. Rename player\n");
+    printf("4. Delete player\n");
+    printf("5. Show credits\n");
+    printf("6. Exit\n");
 
     printf("Select an option: ");
     scanf("%d", choice);
@@ -404,7 +412,9 @@ void updatePlayerIfHigherScore(Player **head, char *nickname, float newScore){
     return;
 }
 
-void deletePlayer(Player** head, int playerId, char* nickname){
+void deletePlayer(Player** head){
+    int playerId;
+
     if (*head == NULL) {
         printf("There's no player to delete\n");
         return;
@@ -434,7 +444,7 @@ void deletePlayer(Player** head, int playerId, char* nickname){
             }
             
             free(current);
-            printf("The player %i was successfully deleted. RIP %s.\n", playerId, nickname);
+            printf("The player %i was successfully deleted. RIP.\n", playerId);
             return;
         }
         current = current->next;
