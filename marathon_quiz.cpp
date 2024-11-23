@@ -299,7 +299,7 @@ void displayQuestionsByCategory(Question* head, int category){
 	int found=0;
 	while (current != NULL){
 		if(current->category==category){
-			printf("\n%c %s\n", 254, current->question);
+		    printf("\n-> %s\n", current->question);
 			found=1;
 		}
 		current= current->next;
