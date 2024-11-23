@@ -9,6 +9,15 @@
 #define easyModeMultiplier 0.5
 #define normalModeMultiplier 1
 #define godModeMultiplier 2
+//array of category names
+const char* categoryNames[] = {
+    "Mexican History",
+    "General History",
+    "Geography",
+    "Sports, Movies, Books, Art",
+    "Science and Biology",
+    "Spanish, Philosophy and Religion"
+};
 
 //Player struct definition
 typedef struct Player{
@@ -21,6 +30,7 @@ typedef struct Player{
 
 typedef struct Question {
     int id;
+    int category;
 	char question[MAX_STRING_QUESTION];
     char options[3][MAX_STRING_QUESTION];
     int correct_answer;
@@ -63,12 +73,17 @@ float newScore(int,int);
 //Nickname creation function prototype definition
 void nicknameCreation(char*);
 
+//Category functions
+void categoryMenu(int *category);
+void displayQuestionsByCategory(Question* head, int category);
+
 int main(){
     Question* questionHead = NULL;
     Player *playerHead=NULL;
     PlayedRound* playedRoundHead = NULL;
     int choice;
     int questionId = 0;
+    int category= 0;
     while(1){
         showMenu(&choice);
         switch (choice)
@@ -85,13 +100,17 @@ int main(){
             	deleteQuestionById(&questionHead, questionId);
             	break;
             case 4:
+            	categoryMenu(&category);
+            	displayQuestionsByCategory(questionHead, category);
+            	break;
+            case 5:
                 printf("\n============================\n");
                 printf("    PROGRAM CREDITS\n");
                 printf("============================\n");
                 printf("Marathon Quiz Game\n");
                 printf("Developed by E13A Group\n\n");
                 break;
-            case 5:
+            case 6:
                 printf("Bye bye ...\n");
                 freeQuestions(questionHead);
                 freePlayers(playerHead);
@@ -114,12 +133,30 @@ void showMenu(int *choice){
     printf("1. Register new question\n");
     printf("2. Play game\n");
     printf("3. Delete question\n");
-    printf("4. Show credits\n");
-    printf("5. Exit\n");
+    printf("4. Display questions by category\n");
+    printf("5. Show credits\n");
+    printf("6. Exit\n");
 
     printf("Select an option: ");
     scanf("%d", choice);
     getchar();
+}
+/*
+    Display the category selection menu
+*/
+void categoryMenu(int *category){
+    printf("\n1. Mexican History\n");
+    printf("2. General History\n");
+    printf("3. Geography\n");
+    printf("4. Sports, Movies, Books, Art\n");
+    printf("5. Science and Biology\n");
+    printf("6. Spanish, Philosophy and Religion\n");
+    
+    do{
+        printf("Select a category (1-6): ");
+        scanf("%d", category); 
+		while(getchar() != '\n');
+    }while(*category < 1 || *category > 6); 
 }
 /*
 Create a question in memory.
@@ -146,6 +183,11 @@ Question* createQuestion(int questionId) {
         scanf("%d", &newQuestion->correct_answer);
         getchar();
     } while (newQuestion->correct_answer < 1 || newQuestion->correct_answer > 3);
+    
+    int category;
+    categoryMenu(&category);
+    newQuestion->category=category;
+    
     newQuestion->id = questionId;
     newQuestion->next = NULL;
     return newQuestion;
@@ -243,12 +285,28 @@ void addQuestion(Question** questionHead) {
 Display specific question with options
 */
 void displayQuestion(Question* q, int* questionNumber) {
+    printf("\nCategory:  %s\n", categoryNames[(q->category)-1]);
     printf("\nQuestion %d: %s\n", *questionNumber, q->question);
     for (int i = 0; i < 3; i++) {
         printf("%d. %s\n", i + 1, q->options[i]);
     }
 }
-
+/*
+Display question by specific category
+*/
+void displayQuestionsByCategory(Question* head, int category){
+	Question * current= head;
+	int found=0;
+	while (current != NULL){
+		if(current->category==category){
+		    printf("\n-> %s\n", current->question);
+		    found=1;
+		}
+		current= current->next;
+	}
+	if(found!=1) printf("\nThere are no questions in this category\n" );
+	printf("\n");
+}
 /*
 Logic for marathon game
 */
