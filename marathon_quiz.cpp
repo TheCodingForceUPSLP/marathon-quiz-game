@@ -34,12 +34,23 @@ typedef struct PlayedRound{
 	struct PlayedRound* next;
 }PlayedRound;
 
+// Definition of the doubly linked list node structure
+typedef struct wrongAnswer {
+    int IdQuestion;               // Stores the question number, like 1, 2, 3...x
+    char Question[MAX_STRING_QUESTION];           // Stores the wrong question from the main question node
+    char wrongAnswer[MAX_STRING_QUESTION];        // Stores the wrong answer (A, B, C, D, and the answer)
+    char correctAnswer[MAX_STRING_QUESTION];      // Stores the correct answer from the main question node
+    struct wrongAnswer* next;     // Points to the next node
+    struct wrongAnswer* prev;     // Points to the previous node
+} wrongAnswer;
+
 // Function prototypes
 Question* createQuestion(int questionId);
 Question* searchQuestion(Question *questionHead, int questionId);
 void deleteQuestionById(Question **questionHead, int questionId);
 int getLastQuestionId(Question* questionHead, int idStart);
 void showMenu(int *choice);
+void InsertWrongAnswer(wrongAnswer** head, int id, const char* question, const char* wrong, const char* correct); // Function to insert wrong answers
 
 PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
 void insertPlayedRound(PlayedRound **head, int difficulty, int playerID , int points);
