@@ -44,18 +44,31 @@ typedef struct PlayedRound{
 	struct PlayedRound* next;
 }PlayedRound;
 
+// Definition of the doubly linked list node structure
+typedef struct wrongAnswer {
+    int IdQuestion;               // Stores the question number, like 1, 2, 3...x
+    char Question[MAX_STRING_QUESTION];           // Stores the wrong question from the main question node
+    char wrongAnswer[MAX_STRING_QUESTION];        // Stores the wrong answer (A, B, C, D, and the answer)
+    char correctAnswer[MAX_STRING_QUESTION];      // Stores the correct answer from the main question node
+    struct wrongAnswer* next;     // Points to the next node
+    struct wrongAnswer* prev;     // Points to the previous node
+} wrongAnswer;
+
 // Function prototypes
 Question* createQuestion(int questionId);
 Question* searchQuestion(Question *questionHead, int questionId);
 void deleteQuestionById(Question **questionHead, int questionId);
 int getLastQuestionId(Question* questionHead, int idStart);
 void showMenu(int *choice);
+void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int wrong, int correct);
+
+
 
 PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
 void insertPlayedRound(PlayedRound **head, int difficulty, int playerID , int points);
-  
+void freeListWrongAnswers(wrongAnswer* head);
 void addQuestion(Question** questionHead);
-void playGame(Question* questionHead, Player**, PlayedRound**);
+void playGame(Question* questionHead, Player**, PlayedRound**, wrongAnswer**);
 void freeQuestions(Question* questionHead);
 
 //Player core function prototype definition
@@ -66,6 +79,7 @@ void updatePlayerIfHigherScore(Player**,char*,float);
 bool isNicknameInList(Player*,char*);
 int getLastId(Player*,int);
 void freePlayers(Player*);
+
 
 //Scoring system function prototype definition
 float newScore(int,int);
@@ -78,6 +92,7 @@ void categoryMenu(int *category);
 void displayQuestionsByCategory(Question* head, int category);
 
 int main(){
+    wrongAnswer* WrongAnswers = NULL;
     Question* questionHead = NULL;
     Player *playerHead=NULL;
     PlayedRound* playedRoundHead = NULL;
@@ -92,7 +107,7 @@ int main(){
                 addQuestion(&questionHead);
                 break;
             case 2:
-                playGame(questionHead,&playerHead, &playedRoundHead);
+                playGame(questionHead,&playerHead, &playedRoundHead, &WrongAnswers);
                 break;
             case 3:
             	printf("\nEnter the id of the question to delete: ");
@@ -114,6 +129,7 @@ int main(){
                 printf("Bye bye ...\n");
                 freeQuestions(questionHead);
                 freePlayers(playerHead);
+                freeListWrongAnswers(WrongAnswers);
                 return 0;
                 break;
             default:
@@ -310,7 +326,7 @@ void displayQuestionsByCategory(Question* head, int category){
 /*
 Logic for marathon game
 */
-void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRound) {
+void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRound, wrongAnswer** wrongAnswers) {
     int lives = 3;
     int score = 0;
     int questionNumber = 1;
@@ -348,6 +364,11 @@ void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRo
         } else {
             lives--;
             printf("Wrong! Lives remaining: %d\n", lives);
+                                            //id 1 to x... questions  get 1 to 3    the correct answer
+            InsertWrongAnswer(wrongAnswers, questionNumber, current, answer, current->correct_answer);
+
+
+
         }
         
         current = current->next;
@@ -599,4 +620,70 @@ void updatePlayerIfHigherScore(Player **head, char *nickname, float newScore){
         insertSortedPlayer(head,reference);
     }
     return;
+}
+
+void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int wrong, int correct) {
+    // Search for the question node using the given ID
+    Question* questionNode = searchQuestion(questionHead, id);
+    if (questionNode == NULL) {
+        printf("Question with ID %d not found.\n", id);
+        return;
+    }
+
+    // Allocate memory for the new wrongAnswer node
+    wrongAnswer* newNode = (wrongAnswer*)malloc(sizeof(wrongAnswer));
+    if (!newNode) { // Check if memory allocation was successful
+        perror("Failed to allocate memory");
+        exit(EXIT_FAILURE);
+    }
+
+
+    // Assign values to the new node
+    newNode->IdQuestion = id;
+    strcpy(newNode->Question, questionNode->question); // Copy the question text
+
+    // Validate the index of the wrong answer
+    if (wrong < 1 || wrong > 3) {
+        printf("Invalid wrong answer index: %d. Must be between 1 and 3.\n", wrong);
+        free(newNode);
+        return;
+    }
+    // Copy the wrong answer option
+    strcpy(newNode->wrongAnswer, questionNode->options[wrong - 1]);
+
+    // Validate the index of the correct answer
+    if (correct < 1 || correct > 3) {
+        printf("Invalid correct answer index: %d. Must be between 1 and 3.\n", correct);
+        free(newNode);
+        return;
+    }
+    // Copy the correct answer option
+    strcpy(newNode->correctAnswer, questionNode->options[correct - 1]);
+
+    // Set the pointers for the new node
+    newNode->next = NULL;
+    newNode->prev = NULL;
+
+    // Insert the new node at the end of the list
+    if (*head == NULL) { // If the list is empty
+        *head = newNode;
+    } else {
+        wrongAnswer* temp = *head;
+        // Traverse to the last node in the list
+        while (temp->next) {
+            temp = temp->next;
+        }
+        // Link the new node at the end
+        temp->next = newNode;
+        newNode->prev = temp;
+    }
+}
+
+void freeListWrongAnswers(wrongAnswer* head) {
+    wrongAnswer* temp;
+    while (head) {
+        temp = head;
+        head = head->next;
+        free(temp);  // Free the memory of the node
+    }
 }
