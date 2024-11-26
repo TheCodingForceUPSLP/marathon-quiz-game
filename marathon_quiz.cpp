@@ -481,10 +481,9 @@ void changeName(Player* head) {
         return;
     }
     //if the id exist now it asks you the name
-    printf("How wants this person to be called?:\n ");
-    fgets(nickname, MAX_STRING_NICKNAME, stdin);
- 	//this parts lets copy an especific number of characters and lets space for the NULL character
-    strcpy(nickname, current->nickname);
+    
 
-    printf("The person with the ID %d will be known as %s now\n", playerId, current->nickname);
+    nicknameCreation(nickname);
+
+    printf("The person with the ID %d will be known as %s now\n", playerId, nickname);
 }
