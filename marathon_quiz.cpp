@@ -90,7 +90,7 @@ int main(){
                 printf("Bye bye ...\n");
                 freeQuestions(questionHead);
                 freePlayers(playerHead);
-                freePlayedRounds(playedRoudHead);
+                freePlayedRounds(playedRoundHead);
                 return 0;
                 break;
             default:
