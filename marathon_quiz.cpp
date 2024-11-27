@@ -39,6 +39,7 @@ void showMenu(int *choice);
 
 PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
 void insertPlayedRound(PlayedRound **head, int difficulty, int playerID , int points);
+void loadPlayedRoundsFromFile(PlayedRound** playedRoundHead);
   
 void addQuestion(Question** questionHead);
 void playGame(Question* questionHead, Player**, PlayedRound**);
@@ -298,7 +299,20 @@ void insertPlayedRound(PlayedRound **head, int difficulty, int playerID, int poi
 	
 }
 
-	
+//Load the records for played rounds 
+void loadPlayedRoundsFromFile(PlayedRound** playedRoundHead) {
+    FILE* file = fopen("playedRounds.txt", "r");
+    if (file == NULL) {
+        printf("Warning: File not found or could not be opened.\n");
+        return;
+    }
+    int difficulty, playerID, points;
+    while (fscanf(file, "%d|%d|%d\n", &difficulty, &playerID, &points) == 3) {
+        insertPlayedRound(playedRoundHead, difficulty, playerID, points);
+    }
+    fclose(file);
+    printf("Played rounds have been loaded successfully.\n");
+}
 
 //Empty all the players of the list
 void freePlayers(struct Player* head) {
