@@ -41,6 +41,7 @@ PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
 void insertPlayedRound(PlayedRound **head, int difficulty, int playerID , int points);
 void loadPlayedRoundsFromFile(PlayedRound** playedRoundHead);
 void savePlayedRoundsToFile(PlayedRound* playedRoundHead);
+void freePlayedRounds(PlayedRound* playedRoundHead);
   
 void addQuestion(Question** questionHead);
 void playGame(Question* questionHead, Player**, PlayedRound**);
@@ -89,6 +90,7 @@ int main(){
                 printf("Bye bye ...\n");
                 freeQuestions(questionHead);
                 freePlayers(playerHead);
+                freePlayedRounds(playedRoudHead);
                 return 0;
                 break;
             default:
@@ -331,6 +333,16 @@ void savePlayedRoundsToFile(PlayedRound* playedRoundHead){
     }
     fclose(file);
     printf("Played rounds have been saved successfully.\n");
+}
+
+//Empty all the players rounds
+void freePlayedRounds(PlayedRound* playedRoundHead){
+    PlayedRound* current = playedRoundHead;
+    while (current != NULL) {
+        PlayedRound* temp = current;
+        current = current->next;
+        free(temp);
+    }
 }
 
 //Empty all the players of the list
