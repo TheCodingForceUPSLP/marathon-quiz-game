@@ -66,6 +66,7 @@ int main(){
     Player *playerHead=NULL;
     PlayedRound* playedRoundHead = NULL;
     int choice;
+    loadPlayedRoundsFromFile(&playedRoundHead);
     while(1){
         showMenu(&choice);
         switch (choice)
