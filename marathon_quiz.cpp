@@ -39,6 +39,9 @@ void showMenu(int *choice);
 
 PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
 void insertPlayedRound(PlayedRound **head, int difficulty, int playerID , int points);
+void loadPlayedRoundsFromFile(PlayedRound** playedRoundHead);
+void savePlayedRoundsToFile(PlayedRound* playedRoundHead);
+void freePlayedRounds(PlayedRound* playedRoundHead);
   
 void addQuestion(Question** questionHead);
 void playGame(Question* questionHead, Player**, PlayedRound**);
@@ -64,6 +67,7 @@ int main(){
     Player *playerHead=NULL;
     PlayedRound* playedRoundHead = NULL;
     int choice;
+    loadPlayedRoundsFromFile(&playedRoundHead);
     while(1){
         showMenu(&choice);
         switch (choice)
@@ -73,6 +77,7 @@ int main(){
                 break;
             case 2:
                 playGame(questionHead,&playerHead, &playedRoundHead);
+                savePlayedRoundsToFile(playedRoundHead); // Save after playing a game
                 break;
             case 3:
                 printf("\n============================\n");
@@ -85,6 +90,7 @@ int main(){
                 printf("Bye bye ...\n");
                 freeQuestions(questionHead);
                 freePlayers(playerHead);
+                freePlayedRounds(playedRoundHead);
                 return 0;
                 break;
             default:
@@ -298,7 +304,46 @@ void insertPlayedRound(PlayedRound **head, int difficulty, int playerID, int poi
 	
 }
 
-	
+//Load the records for played rounds 
+void loadPlayedRoundsFromFile(PlayedRound** playedRoundHead) {
+    FILE* file = fopen("playedRounds.txt", "r");
+    if (file == NULL) {
+        printf("Warning: File not found or could not be opened.\n");
+        return;
+    }
+    int difficulty, playerID, points;
+    while (fscanf(file, "%d|%d|%d\n", &difficulty, &playerID, &points) == 3) {
+        insertPlayedRound(playedRoundHead, difficulty, playerID, points);
+    }
+    fclose(file);
+    printf("Played rounds have been loaded successfully.\n");
+}
+
+//Save the records for played rounds 
+void savePlayedRoundsToFile(PlayedRound* playedRoundHead){
+    FILE* file = fopen("playedRounds.txt", "w");
+    if (file == NULL) {
+        printf("Error: Could not open file for saving played rounds.\n");
+        return;
+    }
+    PlayedRound* current = playedRoundHead;
+    while (current != NULL) {
+        fprintf(file, "%d|%d|%d\n", current->difficulty, current->playerID, current->points);
+        current = current->next;
+    }
+    fclose(file);
+    printf("Played rounds have been saved successfully.\n");
+}
+
+//Empty all the players rounds
+void freePlayedRounds(PlayedRound* playedRoundHead){
+    PlayedRound* current = playedRoundHead;
+    while (current != NULL) {
+        PlayedRound* temp = current;
+        current = current->next;
+        free(temp);
+    }
+}
 
 //Empty all the players of the list
 void freePlayers(struct Player* head) {
