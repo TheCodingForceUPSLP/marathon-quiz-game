@@ -42,6 +42,8 @@ void updatePlayerIfHigherScore(Player**,char*,float);
 bool isNicknameInList(Player*,char*);
 int getLastId(Player*,int);
 void freePlayers(Player*);
+void deletePlayer(Player** head);
+void changeName(Player* head);
 
 //Scoring system function prototype definition
 float newScore(int,int);
@@ -70,13 +72,19 @@ int main(){
             	printPlayers(playerHead);
             	break;	
             case 4:
+                changeName(playerHead);
+                break;
+            case 5:
+                deletePlayer(&playerHead);        
+                break;
+            case 6:
                 printf("\n============================\n");
                 printf("    PROGRAM CREDITS\n");
                 printf("============================\n");
                 printf("Marathon Quiz Game\n");
                 printf("Developed by E13A Group\n\n");
                 break;
-            case 5:
+            case 7:
                 printf("Bye bye ...\n");
                 freeQuestions(questionHead);
                 freePlayers(playerHead);
@@ -98,9 +106,11 @@ void showMenu(int *choice){
     printf("============================\n");
     printf("1. Register new question\n");
     printf("2. Play game\n");
-    printf("3. Display ranking players\n");    
-    printf("4. Show credits\n");
-    printf("5. Exit\n");
+    printf("3. Display ranking players\n");   
+    printf("4. Rename player\n");
+    printf("5. Delete player\n");
+    printf("6. Show credits\n");
+    printf("7. Exit\n");
 
     printf("Select an option: ");
     scanf("%d", choice);
@@ -409,6 +419,80 @@ void updatePlayerIfHigherScore(Player **playerHead, char *nickname, float newSco
         insertSortedPlayer(playerHead,reference);
     }
     return;
+}
+
+void deletePlayer(Player** head){
+    int playerId;
+
+    if (*head == NULL) {
+        printf("There's no player to delete\n");
+        return;
+    }
+
+    Player* current = *head;
+
+    // Prompt user for the ID of the player to delete
+    printf("What's the id of the poor soul you want to delete?\n");
+    scanf("%i", &playerId);
+
+    while (current != NULL) {
+        if (current->id == playerId) {
+            
+            if (current == *head) {
+                *head = current->next;
+                if (*head != NULL) {
+                    (*head)->prev = NULL;
+                }
+            } else {
+                if (current->prev != NULL) {
+                    current->prev->next = current->next;
+                }
+                if (current->next != NULL) {
+                    current->next->prev = current->prev;
+                }
+            }
+            
+            free(current);
+            printf("The player %i was successfully deleted. RIP.\n", playerId);
+            return;
+        }
+        current = current->next;
+    }
+
+    // If no player with the given ID was found
+    printf("No player with ID %i found.\n", playerId);
+}
+
+void changeName(Player* head) {
+    int playerId;
+    char nickname[MAX_STRING_NICKNAME];
+   //checks if theres already players
+    if (head == NULL) {
+        printf("There's no player to rename\n");
+        return;
+    }
+
+    Player* current = head;
+	//catchs the id 
+    printf("Gimme the id of the one who wants a fresh new name\n ");
+    scanf("%d", &playerId);
+
+    //looks for the id in the list until its empty or finds the name
+    while (current != NULL && current->id != playerId) {
+        current = current->next;
+    }
+
+    //if the id doesnt exist exits
+    if (current == NULL) {
+        printf("There's no such a player with the ID: %d\n", playerId);
+        return;
+    }
+    //if the id exist now it asks you the name
+    nicknameCreation(nickname);
+ 	//this parts lets copy an especific number of characters and lets space for the NULL character
+    strcpy( current->nickname,nickname);
+
+    printf("The person with the ID %d will be known as %s now\n", playerId, current->nickname);
 }
 
 //function for rankings
