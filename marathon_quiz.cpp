@@ -76,6 +76,7 @@ int main(){
                 break;
             case 2:
                 playGame(questionHead,&playerHead, &playedRoundHead);
+                savePlayedRoundsToFile(playedRoundHead); // Save after playing a game
                 break;
             case 3:
                 printf("\n============================\n");
