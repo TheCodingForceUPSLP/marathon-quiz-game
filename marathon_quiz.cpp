@@ -64,9 +64,6 @@ void loadQuestionsFromFile(Question** head);
 void showMenu(int *choice);
 void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int wrong, int correct);
 
-
-
-
 PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
 void insertPlayedRound(PlayedRound **head, int difficulty, int playerID , int points);
 void freeListWrongAnswers(wrongAnswer* head);
@@ -305,17 +302,16 @@ void addQuestion(Question** questionHead) {
 }
 
 //Save questions to a .txt file
-
 void saveQuestionsToFile(Question* head) {
-    FILE* file = fopen("questions.txt", "w");
-    if (file == NULL) {
-        printf("Error: File not found.\n");
+    FILE* tempFile = fopen("questions_temp.txt", "w");
+    if (tempFile == NULL) {
+        printf("Error: Could not create temporary file.\n");
         return;
     }
 
     Question* current = head;
     while (current != NULL) {
-        fprintf(file, "%d|%s|%s|%s|%s|%d\n",
+        fprintf(tempFile, "%d|%s|%s|%s|%s|%d\n",
                 current->id,
                 current->question,
                 current->options[0],
@@ -324,8 +320,14 @@ void saveQuestionsToFile(Question* head) {
                 current->correct_answer);
         current = current->next;
     }
-    fclose(file);
+
+    fclose(tempFile);
+
+    if (rename("questions_temp.txt", "questions.txt") != 0) {
+        printf("Error: Could not replace the original file.\n");
+    }
 }
+
 
 /*
 Load questions from a .txt file
@@ -346,27 +348,36 @@ void loadQuestionsFromFile(Question** head) {
             return;
         }
 
-        // Parse the line from the file
-        if (sscanf(line, "%d|%[^|]|%[^|]|%[^|]|%[^|]|%d",
+        if (sscanf(line, "%d|%[^|]|%[^|]|%[^|]|%[^|]|%d", 
                    &newQuestion->id,
                    newQuestion->question,
                    newQuestion->options[0],
                    newQuestion->options[1],
                    newQuestion->options[2],
                    &newQuestion->correct_answer) != 6) {
-            printf("Warning: Invalid format in line: %s", line);
-            free(newQuestion);
-            continue;
+            printf("Invalid format in line: %s", line);
+            free(newQuestion); // Free memory if the format is invalid
+            continue;  // Skip this line
+        }
+
+        if (newQuestion->correct_answer < 1 || newQuestion->correct_answer > 3) {
+            printf("Invalid correct answer: %d. It should be between 1 and 3.\n", newQuestion->correct_answer);
+            free(newQuestion); // Free memory if the correct answer is invalid
+            continue;  // Skip this question
+        }
+
+        if (!isIdUnique(*head, newQuestion->id)) {
+            printf("Duplicate ID found: %d. Skipping question.\n", newQuestion->id);
+            free(newQuestion); // Free memory if the ID is not unique
+            continue;  // Skip this question
         }
 
         // Add the question to the list
         newQuestion->next = *head;
         *head = newQuestion;
     }
-
     fclose(file);
 }
-
 
 /*
 Display specific question with options
