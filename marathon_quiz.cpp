@@ -45,6 +45,10 @@ void freePlayers(Player*);
 void deletePlayer(Player** head);
 void changeName(Player* head);
 
+//Functions to handle players file
+void savePlayersToFile(Player* playerHead);
+void loadPlayersFromFile(Player** playerHead);
+
 //Scoring system function prototype definition
 float newScore(int,int);
 
@@ -58,6 +62,7 @@ int main(){
     Question* questionHead = NULL;
     Player *playerHead=NULL;
     int choice;
+    loadPlayersFromFile(&playerHead);
     while(1){
         showMenu(&choice);
         switch (choice)
@@ -67,6 +72,7 @@ int main(){
                 break;
             case 2:
                 playGame(questionHead,&playerHead);
+                savePlayersToFile(playerHead);
                 break;
             case 3:
             	printPlayers(playerHead);
@@ -574,4 +580,54 @@ void printPlayers(Player *head){
 	    }
     }
     return;
+}
+
+/*
+Save the players to a file with | as the separator.
+*/
+void savePlayersToFile(Player* playerHead) {
+    FILE* file = fopen("players.txt", "w");
+    if (file == NULL) {
+        perror("Failed to open file for writing");
+        return;
+    }
+
+    Player* current = playerHead;
+    while (current != NULL) {
+        // Write player data in the format: id|nickname|maxScore
+        fprintf(file, "%d|%s|%.2f\n", current->id, current->nickname, current->maxScore);
+        current = current->next;
+    }
+
+    fclose(file);
+    printf("Players saved successfully to 'players.txt'.\n");
+}
+
+/*
+Load the players from a file with | as the separator.
+*/
+void loadPlayersFromFile(Player** playerHead) {
+    FILE* file = fopen("players.txt", "r");
+    if (file == NULL) {
+        perror("Failed to open file for reading");
+        return;
+    }
+
+    char line[512];
+    while (fgets(line, sizeof(line), file)) {
+        int id;
+        char nickname[MAX_STRING_NICKNAME];
+        float maxScore;
+
+        // Parse the line using | as the delimiter
+        if (sscanf(line, "%d|%[^|]|%f", &id, nickname, &maxScore) == 3) {
+            Player* newPlayer = createPlayer(id, nickname, maxScore);
+            insertSortedPlayer(playerHead, newPlayer);
+        } else {
+            printf("Invalid format in line: %s", line);
+        }
+    }
+
+    fclose(file);
+    printf("Players loaded successfully from 'players.txt'.\n");
 }
