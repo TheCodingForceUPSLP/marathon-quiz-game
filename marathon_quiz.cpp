@@ -45,6 +45,9 @@ void freePlayers(Player*);
 void deletePlayer(Player** head);
 void changeName(Player* head);
 
+//Functions to handle players file
+void savePlayersToFile(Player* playerHead);
+
 //Scoring system function prototype definition
 float newScore(int,int);
 
@@ -574,4 +577,25 @@ void printPlayers(Player *head){
 	    }
     }
     return;
+}
+
+/*
+Save the players to a file with | as the separator.
+*/
+void savePlayersToFile(Player* playerHead) {
+    FILE* file = fopen("players.txt", "w");
+    if (file == NULL) {
+        perror("Failed to open file for writing");
+        return;
+    }
+
+    Player* current = playerHead;
+    while (current != NULL) {
+        // Write player data in the format: id|nickname|maxScore
+        fprintf(file, "%d|%s|%.2f\n", current->id, current->nickname, current->maxScore);
+        current = current->next;
+    }
+
+    fclose(file);
+    printf("Players saved successfully to 'players.txt'.\n");
 }
