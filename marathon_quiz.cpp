@@ -47,7 +47,7 @@ void changeName(Player* head);
 
 //Functions to handle players file
 void savePlayersToFile(Player* playerHead);
-void loadPlayersFromFile(Player** playerHead)
+void loadPlayersFromFile(Player** playerHead);
 
 //Scoring system function prototype definition
 float newScore(int,int);
@@ -62,6 +62,7 @@ int main(){
     Question* questionHead = NULL;
     Player *playerHead=NULL;
     int choice;
+    loadPlayersFromFile(&playerHead);
     while(1){
         showMenu(&choice);
         switch (choice)
@@ -71,6 +72,7 @@ int main(){
                 break;
             case 2:
                 playGame(questionHead,&playerHead);
+                savePlayersToFile(playerHead);
                 break;
             case 3:
             	printPlayers(playerHead);
