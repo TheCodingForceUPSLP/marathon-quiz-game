@@ -47,6 +47,7 @@ void changeName(Player* head);
 
 //Functions to handle players file
 void savePlayersToFile(Player* playerHead);
+void loadPlayersFromFile(Player** playerHead)
 
 //Scoring system function prototype definition
 float newScore(int,int);
@@ -598,4 +599,33 @@ void savePlayersToFile(Player* playerHead) {
 
     fclose(file);
     printf("Players saved successfully to 'players.txt'.\n");
+}
+
+/*
+Load the players from a file with | as the separator.
+*/
+void loadPlayersFromFile(Player** playerHead) {
+    FILE* file = fopen("players.txt", "r");
+    if (file == NULL) {
+        perror("Failed to open file for reading");
+        return;
+    }
+
+    char line[512];
+    while (fgets(line, sizeof(line), file)) {
+        int id;
+        char nickname[MAX_STRING_NICKNAME];
+        float maxScore;
+
+        // Parse the line using | as the delimiter
+        if (sscanf(line, "%d|%[^|]|%f", &id, nickname, &maxScore) == 3) {
+            Player* newPlayer = createPlayer(id, nickname, maxScore);
+            insertSortedPlayer(playerHead, newPlayer);
+        } else {
+            printf("Invalid format in line: %s", line);
+        }
+    }
+
+    fclose(file);
+    printf("Players loaded successfully from 'players.txt'.\n");
 }
