@@ -59,6 +59,8 @@ Question* createQuestion(int questionId);
 Question* searchQuestion(Question *questionHead, int questionId);
 void deleteQuestionById(Question **questionHead, int questionId);
 int getLastQuestionId(Question* questionHead, int idStart);
+void loadQuestionsFromFile(Question** questionHead);
+void saveQuestionsToFile(Question* questionHead);
 void showMenu(int *choice);
 void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int wrong, int correct);
 
@@ -99,12 +101,14 @@ int main(){
     int choice;
     int questionId = 0;
     int category= 0;
+    loadQuestionsFromFile(&questionHead);
     while(1){
         showMenu(&choice);
         switch (choice)
         {
             case 1:
                 addQuestion(&questionHead);
+                saveQuestionsToFile(questionHead);
                 break;
             case 2:
                 playGame(questionHead,&playerHead, &playedRoundHead, &WrongAnswers);
@@ -113,6 +117,7 @@ int main(){
             	printf("\nEnter the id of the question to delete: ");
             	scanf("%d",&questionId);
             	deleteQuestionById(&questionHead, questionId);
+            	saveQuestionsToFile(questionHead);
             	break;
             case 4:
             	categoryMenu(&category);
@@ -295,6 +300,70 @@ void addQuestion(Question** questionHead) {
         current->next = newQuestion;
     }
     printf("\nQuestion added successfully!\n");
+}
+
+/*
+Save questions to a .txt file
+*/
+void saveQuestionsToFile(Question* questionHead) {
+    FILE* file = fopen("questions.txt", "w");
+    if (file == NULL) {
+        printf("Error: File not found.\n");
+        return;
+    }
+
+    Question* current = questionHead;
+    while (current != NULL) {
+        fprintf(file, "%d|%s|%s|%s|%s|%d\n",
+                current->id,
+                current->question,
+                current->options[0],
+                current->options[1],
+                current->options[2],
+                current->correct_answer);
+        current = current->next;
+    }
+    fclose(file);
+}
+
+/*
+Load questions from a .txt file
+*/
+void loadQuestionsFromFile(Question** questionHead) {
+    FILE* file = fopen("questions.txt", "r");
+    if (file == NULL) {
+        printf("The file 'questions.txt' does not exist. A new one will be created when questions are saved.\n");
+        return;
+    }
+
+    char line[1024];
+    while (fgets(line, sizeof(line), file)) {
+        Question* newQuestion = (Question*)malloc(sizeof(Question));
+        if (newQuestion == NULL) {
+            printf("Error: Could not allocate memory while loading questions.\n");
+            fclose(file);
+            return;
+        }
+
+        // Parse the line from the file
+        if (sscanf(line, "%d|%[^|]|%[^|]|%[^|]|%[^|]|%d",
+                   &newQuestion->id,
+                   newQuestion->question,
+                   newQuestion->options[0],
+                   newQuestion->options[1],
+                   newQuestion->options[2],
+                   &newQuestion->correct_answer) != 6) {
+            printf("Warning: Invalid format in line: %s", line);
+            free(newQuestion);
+            continue;
+        }
+
+        // Add the question to the list
+        newQuestion->next = *questionHead;
+        *questionHead = newQuestion;
+    }
+
+    fclose(file);
 }
 
 /*
