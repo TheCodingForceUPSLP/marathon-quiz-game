@@ -100,6 +100,7 @@ int main(){
     int choice;
     int questionId = 0;
     int category= 0;
+    loadQuestionsFromFile(&questionHead);
     while(1){
         showMenu(&choice);
         switch (choice)
