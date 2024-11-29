@@ -108,6 +108,7 @@ int main(){
         {
             case 1:
                 addQuestion(&questionHead);
+                saveQuestionsToFile(questionHead);
                 break;
             case 2:
                 playGame(questionHead,&playerHead, &playedRoundHead, &WrongAnswers);
@@ -116,6 +117,7 @@ int main(){
             	printf("\nEnter the id of the question to delete: ");
             	scanf("%d",&questionId);
             	deleteQuestionById(&questionHead, questionId);
+            	saveQuestionsToFile(questionHead);
             	break;
             case 4:
             	categoryMenu(&category);
