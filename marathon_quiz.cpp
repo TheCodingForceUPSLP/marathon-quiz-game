@@ -59,6 +59,7 @@ Question* createQuestion(int questionId);
 Question* searchQuestion(Question *questionHead, int questionId);
 void deleteQuestionById(Question **questionHead, int questionId);
 int getLastQuestionId(Question* questionHead, int idStart);
+void loadQuestionsFromFile(Question** questionHead);
 void showMenu(int *choice);
 void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int wrong, int correct);
 
@@ -295,6 +296,46 @@ void addQuestion(Question** questionHead) {
         current->next = newQuestion;
     }
     printf("\nQuestion added successfully!\n");
+}
+
+/*
+Load questions from a .txt file
+*/
+void loadQuestionsFromFile(Question** questionHead) {
+    FILE* file = fopen("questions.txt", "r");
+    if (file == NULL) {
+        printf("The file 'questions.txt' does not exist. A new one will be created when questions are saved.\n");
+        return;
+    }
+
+    char line[1024];
+    while (fgets(line, sizeof(line), file)) {
+        Question* newQuestion = (Question*)malloc(sizeof(Question));
+        if (newQuestion == NULL) {
+            printf("Error: Could not allocate memory while loading questions.\n");
+            fclose(file);
+            return;
+        }
+
+        // Parse the line from the file
+        if (sscanf(line, "%d|%[^|]|%[^|]|%[^|]|%[^|]|%d",
+                   &newQuestion->id,
+                   newQuestion->question,
+                   newQuestion->options[0],
+                   newQuestion->options[1],
+                   newQuestion->options[2],
+                   &newQuestion->correct_answer) != 6) {
+            printf("Warning: Invalid format in line: %s", line);
+            free(newQuestion);
+            continue;
+        }
+
+        // Add the question to the list
+        newQuestion->next = *questionHead;
+        *questionHead = newQuestion;
+    }
+
+    fclose(file);
 }
 
 /*
