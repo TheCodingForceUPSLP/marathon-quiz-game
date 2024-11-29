@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<math.h>
 
 //Const definition
 #define MAX_STRING_QUESTION 256
@@ -57,14 +58,12 @@ typedef struct wrongAnswer {
 // Function prototypes
 Question* createQuestion(int questionId);
 Question* searchQuestion(Question *questionHead, int questionId);
-void deleteQuestionById(Question **questionHead, int questionId);
 int getLastQuestionId(Question* questionHead, int idStart);
+void deleteQuestionById(Question **questionHead, int questionId);
 void loadQuestionsFromFile(Question** questionHead);
 void saveQuestionsToFile(Question* questionHead);
 void showMenu(int *choice);
 void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int wrong, int correct);
-
-
 
 PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
 void insertPlayedRound(PlayedRound **head, int difficulty, int playerID , int points);
@@ -74,14 +73,19 @@ void playGame(Question* questionHead, Player**, PlayedRound**, wrongAnswer**);
 void freeQuestions(Question* questionHead);
 
 //Player core function prototype definition
+Player* findPlayerByNickname(Player*,char*);
 Player* createPlayer(int,char*,float);
 void insertSortedPlayer(Player**,Player*);
-Player* findPlayerByNickname(Player*,char*);
 void updatePlayerIfHigherScore(Player**,char*,float);
+void freePlayers(Player*);
+void deletePlayer(Player** head);
+void changeName(Player* head);
 bool isNicknameInList(Player*,char*);
 int getLastId(Player*,int);
-void freePlayers(Player*);
 
+//Functions to handle players file
+void savePlayersToFile(Player* playerHead);
+void loadPlayersFromFile(Player** playerHead);
 
 //Scoring system function prototype definition
 float newScore(int,int);
@@ -89,6 +93,8 @@ float newScore(int,int);
 //Nickname creation function prototype definition
 void nicknameCreation(char*);
 
+//Function for display the rankings
+void printPlayers(Player *head);
 //Category functions
 void categoryMenu(int *category);
 void displayQuestionsByCategory(Question* head, int category);
@@ -98,9 +104,12 @@ int main(){
     Question* questionHead = NULL;
     Player *playerHead=NULL;
     PlayedRound* playedRoundHead = NULL;
+    
     int choice;
     int questionId = 0;
     int category= 0;
+
+    loadPlayersFromFile(&playerHead);
     loadQuestionsFromFile(&questionHead);
     while(1){
         showMenu(&choice);
@@ -112,25 +121,35 @@ int main(){
                 break;
             case 2:
                 playGame(questionHead,&playerHead, &playedRoundHead, &WrongAnswers);
+                savePlayersToFile(playerHead);
                 break;
             case 3:
+            	printPlayers(playerHead);
+            	break;	
+            case 4:
+                changeName(playerHead);
+                break;
+            case 5:
+                deletePlayer(&playerHead);        
+                break;
+            case 6:
             	printf("\nEnter the id of the question to delete: ");
             	scanf("%d",&questionId);
             	deleteQuestionById(&questionHead, questionId);
             	saveQuestionsToFile(questionHead);
             	break;
-            case 4:
+            case 7:
             	categoryMenu(&category);
             	displayQuestionsByCategory(questionHead, category);
             	break;
-            case 5:
+            case 8:
                 printf("\n============================\n");
                 printf("    PROGRAM CREDITS\n");
                 printf("============================\n");
                 printf("Marathon Quiz Game\n");
                 printf("Developed by E13A Group\n\n");
                 break;
-            case 6:
+            case 9:
                 printf("Bye bye ...\n");
                 freeQuestions(questionHead);
                 freePlayers(playerHead);
@@ -148,15 +167,18 @@ int main(){
 Display the Main Menu.
 */
 void showMenu(int *choice){
-    ("\n============================\n");
+    printf("\n============================\n");
     printf("    MARATHON QUIZ GAME\n");
     printf("============================\n");
     printf("1. Register new question\n");
     printf("2. Play game\n");
-    printf("3. Delete question\n");
-    printf("4. Display questions by category\n");
-    printf("5. Show credits\n");
-    printf("6. Exit\n");
+    printf("3. Display ranking players\n");   
+    printf("4. Rename player\n");
+    printf("5. Delete player\n");
+    printf("6. Delete question\n");
+    printf("7. Display questions by category\n");
+    printf("8. Show credits\n");
+    printf("9. Exit\n");
 
     printf("Select an option: ");
     scanf("%d", choice);
@@ -527,11 +549,10 @@ void insertPlayedRound(PlayedRound **head, int difficulty, int playerID, int poi
 	
 }
 
-	
 
 //Empty all the players of the list
-void freePlayers(struct Player* head) {
-    struct Player* current = head;
+void freePlayers(struct Player* playerHead) {
+    struct Player* current = playerHead;
     while (current != NULL) {
         struct Player* temp = current;
         current = current->next;
@@ -590,8 +611,8 @@ Player* createPlayer(int id, char *nickname, float score){
 }
 
 //Check for repeated nicknames
-bool isNicknameInList(Player* head, char* nickname){
-    Player* reference = findPlayerByNickname(head,nickname);
+bool isNicknameInList(Player* playerHead, char* nickname){
+    Player* reference = findPlayerByNickname(playerHead,nickname);
     if(reference==NULL){
         return false;
     }else{
@@ -600,8 +621,8 @@ bool isNicknameInList(Player* head, char* nickname){
 }
 
 //Function to get assign the last id of the newest player
-int getLastId(Player* head, int idStart){
-    Player *last=head;
+int getLastId(Player* playerHead, int idStart){
+    Player *last=playerHead;
     int id=idStart;
     while(last->next!=NULL){
         ++id;
@@ -611,18 +632,18 @@ int getLastId(Player* head, int idStart){
 }
 
 //Insert new player in order from the highest score to the lowest
-void insertSortedPlayer(Player **head, Player *newPlayer){
+void insertSortedPlayer(Player **playerHead, Player *newPlayer){
     //this is the case where there is only one node or when the new score is the highest
-    if(*head==NULL || (*head)->maxScore <= newPlayer->maxScore){
-        newPlayer->next=*head;
-        if(*head!=NULL){
-            (*head)->prev=newPlayer;
+    if(*playerHead==NULL || (*playerHead)->maxScore <= newPlayer->maxScore){
+        newPlayer->next=*playerHead;
+        if(*playerHead!=NULL){
+            (*playerHead)->prev=newPlayer;
         }
-        *head=newPlayer;
+        *playerHead=newPlayer;
         return;
     }
 
-    Player *current=*head;
+    Player *current=*playerHead;
     //case for the first insertion after the main node
     if(current->next==NULL){
         current->next = newPlayer;
@@ -645,8 +666,8 @@ void insertSortedPlayer(Player **head, Player *newPlayer){
 }
 
 //Function to search for players by using the nickname as a reference
-Player* findPlayerByNickname(Player *head, char *nickname){
-    Player* current=head;
+Player* findPlayerByNickname(Player *playerHead, char *nickname){
+    Player* current=playerHead;
     while(current!=NULL){
         if(strcmp(current->nickname,nickname)==0){
             return current;
@@ -657,9 +678,9 @@ Player* findPlayerByNickname(Player *head, char *nickname){
 }
 
 //This function will go into effect when the new score is higher and the player needs to be rearranged
-void updatePlayerIfHigherScore(Player **head, char *nickname, float newScore){
+void updatePlayerIfHigherScore(Player **playerHead, char *nickname, float newScore){
     //reference adress for locating the data needed
-    Player* reference= findPlayerByNickname(*head,nickname);
+    Player* reference= findPlayerByNickname(*playerHead,nickname);
     //in case the player doesn't exist
     if(reference==NULL){
         printf("\n Player doesn't exist");
@@ -686,9 +707,215 @@ void updatePlayerIfHigherScore(Player **head, char *nickname, float newScore){
             nextPlayer->prev=prevPlayer;
         }
 
-        insertSortedPlayer(head,reference);
+        insertSortedPlayer(playerHead,reference);
     }
     return;
+}
+
+void deletePlayer(Player** head){
+    int playerId;
+
+    if (*head == NULL) {
+        printf("There's no player to delete\n");
+        return;
+    }
+
+    Player* current = *head;
+
+    // Prompt user for the ID of the player to delete
+    printf("What's the id of the poor soul you want to delete?\n");
+    scanf("%i", &playerId);
+
+    while (current != NULL) {
+        if (current->id == playerId) {
+            
+            if (current == *head) {
+                *head = current->next;
+                if (*head != NULL) {
+                    (*head)->prev = NULL;
+                }
+            } else {
+                if (current->prev != NULL) {
+                    current->prev->next = current->next;
+                }
+                if (current->next != NULL) {
+                    current->next->prev = current->prev;
+                }
+            }
+            
+            free(current);
+            printf("The player %i was successfully deleted. RIP.\n", playerId);
+            return;
+        }
+        current = current->next;
+    }
+
+    // If no player with the given ID was found
+    printf("No player with ID %i found.\n", playerId);
+}
+
+void changeName(Player* head) {
+    int playerId;
+    char nickname[MAX_STRING_NICKNAME];
+   //checks if theres already players
+    if (head == NULL) {
+        printf("There's no player to rename\n");
+        return;
+    }
+
+    Player* current = head;
+	//catchs the id 
+    printf("Gimme the id of the one who wants a fresh new name\n ");
+    scanf("%d", &playerId);
+
+    //looks for the id in the list until its empty or finds the name
+    while (current != NULL && current->id != playerId) {
+        current = current->next;
+    }
+
+    //if the id doesnt exist exits
+    if (current == NULL) {
+        printf("There's no such a player with the ID: %d\n", playerId);
+        return;
+    }
+    //if the id exist now it asks you the name
+    nicknameCreation(nickname);
+ 	//this parts lets copy an especific number of characters and lets space for the NULL character
+    strcpy( current->nickname,nickname);
+
+    printf("The person with the ID %d will be known as %s now\n", playerId, current->nickname);
+}
+
+//function for rankings
+void printPlayers(Player *head){
+	//if the game doesnt have players then, this if action
+    if(head==NULL){
+        printf("there are not players.\n");
+        return;
+    }
+	//use current like auxiliar
+    Player* current = head;
+    //int type for count all the player in the list
+    int TotalPlayers=0;
+	//scroll through the list and count each player
+    while(current!=NULL){
+        TotalPlayers++;
+        current=current->next;
+    }
+	//int type for declare that in each page there will be 5 players
+	int playersPerPage = 5;
+	//this int type has a important utility, its function acomodate the total of pages even if there are impar numbers
+	int totalPages = ceil((float)TotalPlayers / playersPerPage);
+	//this int is for indicate our current pages, our "head"
+	int currentPage = 1;
+
+    while(1){
+        system("cls");
+        
+	    printf("===============================\n");
+	    printf("PLAYER RANKINGS (PAGE %d of %d)\n",currentPage,totalPages);
+	    printf("===============================\n");
+		
+		/*start is showing us the first player in each page
+		 for exmaple: page 1: start with the number 1 
+		 and the page 2: start with the number 6*/
+	    int start = (currentPage - 1) * playersPerPage + 1;
+	    
+		/*end indicates the last player for each page for example
+	    page 1: end with the number 5
+	    page 2: end with the number 11
+	    */
+	    int end = start + playersPerPage - 1;
+	
+	    // Move to an initial position from the page
+	    current = head;
+	    
+	    int index = 1;
+	    while (current != NULL && index < start) {
+	        current = current->next;
+	        index++;
+	    }
+	
+	    index=start;
+		//Shows us the information of each player and its limit is the "end" that was calculated before 
+	    while (current != NULL && index <= end) {
+	        printf("%d. [ID: %03d] %s - %.1f pts\n", index, current->id, current->nickname, current->maxScore);
+	        current = current->next;
+	        index++;
+	    }
+	    
+	    printf("===============================\n");
+	    printf("1. Previous Page\n");
+	    printf("2. Next Page\n");
+	    printf("3. Exit to Menu\n");
+	    printf("Option: ");
+	
+	    int option=0;
+	    scanf("%d", &option);
+	
+	    if (option == 1 && currentPage > 1) {
+	        currentPage--;
+	    } else if (option == 2 && currentPage < totalPages) {
+	        currentPage++;
+	    } else if (option == 3) {
+	    	 system("cls");
+	        break;
+	    } else {
+	        printf("try again.\n");
+	    }
+    }
+    return;
+}
+
+/*
+Save the players to a file with | as the separator.
+*/
+void savePlayersToFile(Player* playerHead) {
+    FILE* file = fopen("players.txt", "w");
+    if (file == NULL) {
+        perror("Failed to open file for writing");
+        return;
+    }
+
+    Player* current = playerHead;
+    while (current != NULL) {
+        // Write player data in the format: id|nickname|maxScore
+        fprintf(file, "%d|%s|%.2f\n", current->id, current->nickname, current->maxScore);
+        current = current->next;
+    }
+
+    fclose(file);
+    printf("Players saved successfully to 'players.txt'.\n");
+}
+
+/*
+Load the players from a file with | as the separator.
+*/
+void loadPlayersFromFile(Player** playerHead) {
+    FILE* file = fopen("players.txt", "r");
+    if (file == NULL) {
+        perror("Failed to open file for reading");
+        return;
+    }
+
+    char line[512];
+    while (fgets(line, sizeof(line), file)) {
+        int id;
+        char nickname[MAX_STRING_NICKNAME];
+        float maxScore;
+
+        // Parse the line using | as the delimiter
+        if (sscanf(line, "%d|%[^|]|%f", &id, nickname, &maxScore) == 3) {
+            Player* newPlayer = createPlayer(id, nickname, maxScore);
+            insertSortedPlayer(playerHead, newPlayer);
+        } else {
+            printf("Invalid format in line: %s", line);
+        }
+    }
+
+    fclose(file);
+    printf("Players loaded successfully from 'players.txt'.\n");
+
 }
 
 void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int wrong, int correct) {
