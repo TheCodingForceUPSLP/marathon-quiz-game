@@ -10,6 +10,15 @@
 #define easyModeMultiplier 0.5
 #define normalModeMultiplier 1
 #define godModeMultiplier 2
+//array of category names
+const char* categoryNames[] = {
+    "Mexican History",
+    "General History",
+    "Geography",
+    "Sports, Movies, Books, Art",
+    "Science and Biology",
+    "Spanish, Philosophy and Religion"
+};
 
 //Player struct definition
 typedef struct Player{
@@ -21,29 +30,58 @@ typedef struct Player{
 }Player;
 
 typedef struct Question {
-    char question[MAX_STRING_QUESTION];
+    int id;
+    int category;
+	char question[MAX_STRING_QUESTION];
     char options[3][MAX_STRING_QUESTION];
     int correct_answer;
     struct Question* next;
 } Question;
 
+typedef struct PlayedRound{
+	int difficulty; 
+	int playerID;
+	int points;
+	struct PlayedRound* next;
+}PlayedRound;
+
+// Definition of the doubly linked list node structure
+typedef struct wrongAnswer {
+    int IdQuestion;               // Stores the question number, like 1, 2, 3...x
+    char Question[MAX_STRING_QUESTION];           // Stores the wrong question from the main question node
+    char wrongAnswer[MAX_STRING_QUESTION];        // Stores the wrong answer (A, B, C, D, and the answer)
+    char correctAnswer[MAX_STRING_QUESTION];      // Stores the correct answer from the main question node
+    struct wrongAnswer* next;     // Points to the next node
+    struct wrongAnswer* prev;     // Points to the previous node
+} wrongAnswer;
+
 // Function prototypes
-Question* createQuestion();
+Question* createQuestion(int questionId);
+Question* searchQuestion(Question *questionHead, int questionId);
+int getLastQuestionId(Question* questionHead, int idStart);
+void deleteQuestionById(Question **questionHead, int questionId);
+void loadQuestionsFromFile(Question** questionHead);
+void saveQuestionsToFile(Question* questionHead);
 void showMenu(int *choice);
+void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int wrong, int correct);
+
+PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
+void insertPlayedRound(PlayedRound **head, int difficulty, int playerID , int points);
+void freeListWrongAnswers(wrongAnswer* head);
 void addQuestion(Question** questionHead);
-void playGame(Question* questionHead, Player**);
+void playGame(Question* questionHead, Player**, PlayedRound**, wrongAnswer**);
 void freeQuestions(Question* questionHead);
 
 //Player core function prototype definition
+Player* findPlayerByNickname(Player*,char*);
 Player* createPlayer(int,char*,float);
 void insertSortedPlayer(Player**,Player*);
-Player* findPlayerByNickname(Player*,char*);
 void updatePlayerIfHigherScore(Player**,char*,float);
-bool isNicknameInList(Player*,char*);
-int getLastId(Player*,int);
 void freePlayers(Player*);
 void deletePlayer(Player** head);
 void changeName(Player* head);
+bool isNicknameInList(Player*,char*);
+int getLastId(Player*,int);
 
 //Functions to handle players file
 void savePlayersToFile(Player* playerHead);
@@ -57,21 +95,32 @@ void nicknameCreation(char*);
 
 //Function for display the rankings
 void printPlayers(Player *head);
+//Category functions
+void categoryMenu(int *category);
+void displayQuestionsByCategory(Question* head, int category);
 
 int main(){
+    wrongAnswer* WrongAnswers = NULL;
     Question* questionHead = NULL;
     Player *playerHead=NULL;
+    PlayedRound* playedRoundHead = NULL;
+    
     int choice;
+    int questionId = 0;
+    int category= 0;
+
     loadPlayersFromFile(&playerHead);
+    loadQuestionsFromFile(&questionHead);
     while(1){
         showMenu(&choice);
         switch (choice)
         {
             case 1:
                 addQuestion(&questionHead);
+                saveQuestionsToFile(questionHead);
                 break;
             case 2:
-                playGame(questionHead,&playerHead);
+                playGame(questionHead,&playerHead, &playedRoundHead, &WrongAnswers);
                 savePlayersToFile(playerHead);
                 break;
             case 3:
@@ -84,16 +133,27 @@ int main(){
                 deletePlayer(&playerHead);        
                 break;
             case 6:
+            	printf("\nEnter the id of the question to delete: ");
+            	scanf("%d",&questionId);
+            	deleteQuestionById(&questionHead, questionId);
+            	saveQuestionsToFile(questionHead);
+            	break;
+            case 7:
+            	categoryMenu(&category);
+            	displayQuestionsByCategory(questionHead, category);
+            	break;
+            case 8:
                 printf("\n============================\n");
                 printf("    PROGRAM CREDITS\n");
                 printf("============================\n");
                 printf("Marathon Quiz Game\n");
                 printf("Developed by E13A Group\n\n");
                 break;
-            case 7:
+            case 9:
                 printf("Bye bye ...\n");
                 freeQuestions(questionHead);
                 freePlayers(playerHead);
+                freeListWrongAnswers(WrongAnswers);
                 return 0;
                 break;
             default:
@@ -107,7 +167,7 @@ int main(){
 Display the Main Menu.
 */
 void showMenu(int *choice){
-    ("\n============================\n");
+    printf("\n============================\n");
     printf("    MARATHON QUIZ GAME\n");
     printf("============================\n");
     printf("1. Register new question\n");
@@ -115,17 +175,36 @@ void showMenu(int *choice){
     printf("3. Display ranking players\n");   
     printf("4. Rename player\n");
     printf("5. Delete player\n");
-    printf("6. Show credits\n");
-    printf("7. Exit\n");
+    printf("6. Delete question\n");
+    printf("7. Display questions by category\n");
+    printf("8. Show credits\n");
+    printf("9. Exit\n");
 
     printf("Select an option: ");
     scanf("%d", choice);
     getchar();
 }
 /*
+    Display the category selection menu
+*/
+void categoryMenu(int *category){
+    printf("\n1. Mexican History\n");
+    printf("2. General History\n");
+    printf("3. Geography\n");
+    printf("4. Sports, Movies, Books, Art\n");
+    printf("5. Science and Biology\n");
+    printf("6. Spanish, Philosophy and Religion\n");
+    
+    do{
+        printf("Select a category (1-6): ");
+        scanf("%d", category); 
+		while(getchar() != '\n');
+    }while(*category < 1 || *category > 6); 
+}
+/*
 Create a question in memory.
 */
-Question* createQuestion() {
+Question* createQuestion(int questionId) {
     Question* newQuestion = (Question*)malloc(sizeof(Question));
     if (newQuestion == NULL) {
         printf("Memory allocation failed!\n");
@@ -148,15 +227,90 @@ Question* createQuestion() {
         getchar();
     } while (newQuestion->correct_answer < 1 || newQuestion->correct_answer > 3);
     
+    int category;
+    categoryMenu(&category);
+    newQuestion->category=category;
+    
+    newQuestion->id = questionId;
     newQuestion->next = NULL;
     return newQuestion;
+}
+
+/*
+Search for specific question by id
+*/
+Question* searchQuestion(Question *questionHead, int questionId){
+    if (questionHead == NULL) return NULL;
+
+    Question *aux = questionHead;
+
+    while (aux != NULL) {
+        if (aux->id == questionId) return aux;
+        aux = aux->next;
+    }
+
+    printf("ID %d entered is not found\n", questionId);
+    return NULL;
+}
+
+/*
+Delete specific question by id
+*/
+void deleteQuestionById(Question **questionHead, int questionId) {
+    if (*questionHead == NULL) return;
+
+    Question *current = *questionHead;
+    Question *previous = NULL;
+
+    // Searches for the node with the specified ID
+    current = searchQuestion(*questionHead, questionId);
+    
+    // If the ID is not found, terminate
+    if (current == NULL){
+    	printf("\nThe question with the entered id was not found\n");
+    	return;
+	}
+    
+    current = *questionHead;
+    
+    while (current->id != questionId) {
+        previous = current;
+        current = current->next;
+    }
+
+    // If the node to be deleted is the first node to be deleted
+    if (previous == NULL) {
+        *questionHead = current->next;
+    } else {
+        previous->next = current->next;
+    }
+
+    // Frees the memory of the deleted node
+    free(current);
+    
+    printf("\nThe question was correctly deleted");
+}
+
+/*
+Function to get assign the last id of the newest question
+*/
+int getLastQuestionId(Question* questionHead, int idStart){
+	if(questionHead == NULL) return idStart;
+	Question *last=questionHead;
+    int id=idStart;
+    while(last->next!=NULL){
+        ++id;
+        last=last->next;
+    }
+    return ++id;
 }
 
 /*
 Add a question into the simple linked list
 */
 void addQuestion(Question** questionHead) {
-    Question* newQuestion = createQuestion();
+	int questionId = getLastQuestionId(*questionHead, 1);
+    Question* newQuestion = createQuestion(questionId);
     
     if (*questionHead == NULL) {
         *questionHead = newQuestion;
@@ -171,19 +325,99 @@ void addQuestion(Question** questionHead) {
 }
 
 /*
+Save questions to a .txt file
+*/
+void saveQuestionsToFile(Question* questionHead) {
+    FILE* file = fopen("questions.txt", "w");
+    if (file == NULL) {
+        printf("Error: File not found.\n");
+        return;
+    }
+
+    Question* current = questionHead;
+    while (current != NULL) {
+        fprintf(file, "%d|%s|%s|%s|%s|%d\n",
+                current->id,
+                current->question,
+                current->options[0],
+                current->options[1],
+                current->options[2],
+                current->correct_answer);
+        current = current->next;
+    }
+    fclose(file);
+}
+
+/*
+Load questions from a .txt file
+*/
+void loadQuestionsFromFile(Question** questionHead) {
+    FILE* file = fopen("questions.txt", "r");
+    if (file == NULL) {
+        printf("The file 'questions.txt' does not exist. A new one will be created when questions are saved.\n");
+        return;
+    }
+
+    char line[1024];
+    while (fgets(line, sizeof(line), file)) {
+        Question* newQuestion = (Question*)malloc(sizeof(Question));
+        if (newQuestion == NULL) {
+            printf("Error: Could not allocate memory while loading questions.\n");
+            fclose(file);
+            return;
+        }
+
+        // Parse the line from the file
+        if (sscanf(line, "%d|%[^|]|%[^|]|%[^|]|%[^|]|%d",
+                   &newQuestion->id,
+                   newQuestion->question,
+                   newQuestion->options[0],
+                   newQuestion->options[1],
+                   newQuestion->options[2],
+                   &newQuestion->correct_answer) != 6) {
+            printf("Warning: Invalid format in line: %s", line);
+            free(newQuestion);
+            continue;
+        }
+
+        // Add the question to the list
+        newQuestion->next = *questionHead;
+        *questionHead = newQuestion;
+    }
+
+    fclose(file);
+}
+
+/*
 Display specific question with options
 */
 void displayQuestion(Question* q, int* questionNumber) {
+    printf("\nCategory:  %s\n", categoryNames[(q->category)-1]);
     printf("\nQuestion %d: %s\n", *questionNumber, q->question);
     for (int i = 0; i < 3; i++) {
         printf("%d. %s\n", i + 1, q->options[i]);
     }
 }
-
+/*
+Display question by specific category
+*/
+void displayQuestionsByCategory(Question* head, int category){
+	Question * current= head;
+	int found=0;
+	while (current != NULL){
+		if(current->category==category){
+		    printf("\n-> %s\n", current->question);
+		    found=1;
+		}
+		current= current->next;
+	}
+	if(found!=1) printf("\nThere are no questions in this category\n" );
+	printf("\n");
+}
 /*
 Logic for marathon game
 */
-void playGame(Question* questionHead,Player** playerHead) {
+void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRound, wrongAnswer** wrongAnswers) {
     int lives = 3;
     int score = 0;
     int questionNumber = 1;
@@ -221,6 +455,11 @@ void playGame(Question* questionHead,Player** playerHead) {
         } else {
             lives--;
             printf("Wrong! Lives remaining: %d\n", lives);
+                                            //id 1 to x... questions  get 1 to 3    the correct answer
+            InsertWrongAnswer(wrongAnswers, questionNumber, current, answer, current->correct_answer);
+
+
+
         }
         
         current = current->next;
@@ -251,6 +490,12 @@ void playGame(Question* questionHead,Player** playerHead) {
     }
     
     printf("Final score: %d\n", score);
+    /*
+    NOTE:
+    The difficulty and userID are hardcoded 
+    please modify the call
+    */
+    insertPlayedRound(playerRound, 1, 1, score);
 }
 
 /*
@@ -264,6 +509,46 @@ void freeQuestions(struct Question* questionHead) {
         free(temp);
     }
 }
+
+/*
+Create the player round.
+*/
+PlayedRound* createPlayedRound(int difficulty, int playerID, int points){
+    PlayedRound *newRound = (PlayedRound*)malloc(sizeof(PlayedRound));
+	if (newRound == NULL) {
+        printf("ERROR\n");
+        return NULL;
+    }
+	newRound->difficulty = difficulty;
+	newRound->playerID = playerID; 
+	newRound->points = points;
+	newRound->next = NULL; 
+	
+	return newRound;
+}
+
+/*
+Insert player round sorted by difficulty (1,2,3) and the points (ascending order).
+*/
+void insertPlayedRound(PlayedRound **head, int difficulty, int playerID, int points){
+	PlayedRound *newRound = createPlayedRound(difficulty, playerID, points);  
+	//Go through the list and find the position to insert the node
+	if(*head ==NULL || (*head)->difficulty > newRound->difficulty 
+	    							&& (*head)->points < newRound->points){
+		newRound->next = *head;
+		*head = newRound;
+		return; 
+	}
+	PlayedRound *current = *head;
+	while(current->next !=NULL && current->next->difficulty < newRound->difficulty 
+									&& current->next->points >= newRound->points){
+		current = current->next;
+	}
+	newRound->next = current->next;
+	current->next = newRound; 
+	
+}
+
 
 //Empty all the players of the list
 void freePlayers(struct Player* playerHead) {
@@ -630,4 +915,71 @@ void loadPlayersFromFile(Player** playerHead) {
 
     fclose(file);
     printf("Players loaded successfully from 'players.txt'.\n");
+
+}
+
+void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int wrong, int correct) {
+    // Search for the question node using the given ID
+    Question* questionNode = searchQuestion(questionHead, id);
+    if (questionNode == NULL) {
+        printf("Question with ID %d not found.\n", id);
+        return;
+    }
+
+    // Allocate memory for the new wrongAnswer node
+    wrongAnswer* newNode = (wrongAnswer*)malloc(sizeof(wrongAnswer));
+    if (!newNode) { // Check if memory allocation was successful
+        perror("Failed to allocate memory");
+        exit(EXIT_FAILURE);
+    }
+
+
+    // Assign values to the new node
+    newNode->IdQuestion = id;
+    strcpy(newNode->Question, questionNode->question); // Copy the question text
+
+    // Validate the index of the wrong answer
+    if (wrong < 1 || wrong > 3) {
+        printf("Invalid wrong answer index: %d. Must be between 1 and 3.\n", wrong);
+        free(newNode);
+        return;
+    }
+    // Copy the wrong answer option
+    strcpy(newNode->wrongAnswer, questionNode->options[wrong - 1]);
+
+    // Validate the index of the correct answer
+    if (correct < 1 || correct > 3) {
+        printf("Invalid correct answer index: %d. Must be between 1 and 3.\n", correct);
+        free(newNode);
+        return;
+    }
+    // Copy the correct answer option
+    strcpy(newNode->correctAnswer, questionNode->options[correct - 1]);
+
+    // Set the pointers for the new node
+    newNode->next = NULL;
+    newNode->prev = NULL;
+
+    // Insert the new node at the end of the list
+    if (*head == NULL) { // If the list is empty
+        *head = newNode;
+    } else {
+        wrongAnswer* temp = *head;
+        // Traverse to the last node in the list
+        while (temp->next) {
+            temp = temp->next;
+        }
+        // Link the new node at the end
+        temp->next = newNode;
+        newNode->prev = temp;
+    }
+}
+
+void freeListWrongAnswers(wrongAnswer* head) {
+    wrongAnswer* temp;
+    while (head) {
+        temp = head;
+        head = head->next;
+        free(temp);  // Free the memory of the node
+    }
 }
