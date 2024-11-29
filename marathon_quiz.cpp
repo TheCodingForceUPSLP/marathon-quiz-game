@@ -60,6 +60,7 @@ Question* searchQuestion(Question *questionHead, int questionId);
 void deleteQuestionById(Question **questionHead, int questionId);
 int getLastQuestionId(Question* questionHead, int idStart);
 void loadQuestionsFromFile(Question** questionHead);
+void saveQuestionsToFile(Question* questionHead);
 void showMenu(int *choice);
 void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int wrong, int correct);
 
@@ -297,6 +298,30 @@ void addQuestion(Question** questionHead) {
         current->next = newQuestion;
     }
     printf("\nQuestion added successfully!\n");
+}
+
+/*
+Save questions to a .txt file
+*/
+void saveQuestionsToFile(Question* questionHead) {
+    FILE* file = fopen("questions.txt", "w");
+    if (file == NULL) {
+        printf("Error: File not found.\n");
+        return;
+    }
+
+    Question* current = questionHead;
+    while (current != NULL) {
+        fprintf(file, "%d|%s|%s|%s|%s|%d\n",
+                current->id,
+                current->question,
+                current->options[0],
+                current->options[1],
+                current->options[2],
+                current->correct_answer);
+        current = current->next;
+    }
+    fclose(file);
 }
 
 /*
