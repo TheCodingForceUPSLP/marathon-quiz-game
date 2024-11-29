@@ -93,6 +93,9 @@ float newScore(int,int);
 //Nickname creation function prototype definition
 void nicknameCreation(char*);
 
+//Funciton for display quetions page
+void displayQuestionsInPages(Question* questionHead)
+
 //Function for display the rankings
 void printPlayers(Player *head);
 //Category functions
@@ -143,13 +146,15 @@ int main(){
             	displayQuestionsByCategory(questionHead, category);
             	break;
             case 8:
+            	displayQuestionsInPages(Question* questionHead);            	
+            case 9:
                 printf("\n============================\n");
                 printf("    PROGRAM CREDITS\n");
                 printf("============================\n");
                 printf("Marathon Quiz Game\n");
                 printf("Developed by E13A Group\n\n");
                 break;
-            case 9:
+            case 10:
                 printf("Bye bye ...\n");
                 freeQuestions(questionHead);
                 freePlayers(playerHead);
@@ -177,8 +182,9 @@ void showMenu(int *choice){
     printf("5. Delete player\n");
     printf("6. Delete question\n");
     printf("7. Display questions by category\n");
-    printf("8. Show credits\n");
-    printf("9. Exit\n");
+    printf("8. Display questions by page\n");
+    printf("9. Show credits\n");
+    printf("10. Exit\n");
 
     printf("Select an option: ");
     scanf("%d", choice);
@@ -413,6 +419,73 @@ void displayQuestionsByCategory(Question* head, int category){
 	}
 	if(found!=1) printf("\nThere are no questions in this category\n" );
 	printf("\n");
+}
+/*
+Display questions page
+*/
+void displayQuestionsInPages(Question* questionHead) {
+    int currentPage = 1;
+    int questionsPerPage = 5;
+    Question* current = questionHead;
+    
+    while (current != NULL) {
+        int totalQuestions = 0;
+        Question* temp = current;
+        while (temp != NULL) {
+            totalQuestions++;
+            temp = temp->next;
+        }
+
+        int totalPages = ceil((float)totalQuestions / questionsPerPage);
+        if (currentPage > totalPages) {
+            currentPage = totalPages;
+        }
+
+        system("cls");
+        printf("===============================\n");
+        printf("QUESTION LIST (PAGE %d of %d)\n", currentPage, totalPages);
+        printf("===============================\n");
+
+        int start = (currentPage - 1) * questionsPerPage + 1;
+        int end = start + questionsPerPage - 1;
+        int index = 1;
+
+        /*Show questions on current page*/
+        int displayCount = 0;
+        while (current != NULL && displayCount < questionsPerPage) {
+            if (index >= start) {
+                printf("Question %d:\n", index);
+                printf("Text: %s\n", current->question);
+                for (int i = 0; i < 3; i++) {
+                    printf("Option %d: %s\n", i + 1, current->options[i]);
+                }
+                printf("Correct Answer: Option %d: %s\n", current->correct_answer, current->options[current->correct_answer - 1]);
+                printf("\n");
+                displayCount++;
+            }
+            index++;
+            current = current->next;
+        }
+		
+		/*Options menu for page or exit*/
+        printf("===============================\n");
+        printf("1. Previous Page\n");
+        printf("2. Next Page\n");
+        printf("3. Exit to Menu\n");
+        printf("Option: ");
+        int option = 0;
+        scanf("%d", &option);
+
+        if (option == 1 && currentPage > 1) {
+            currentPage--;
+        } else if (option == 2 && currentPage < totalPages) {
+            currentPage++;
+        } else if (option == 3) {
+            break;
+        } else {
+            printf("Try again.\n");
+        }
+    }
 }
 /*
 Logic for marathon game
