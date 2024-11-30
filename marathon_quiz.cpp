@@ -315,6 +315,7 @@ void modifyQuestionById(Question* questionHead, int id) {
 
     // Modify
     printf("Enter new question: ");
+    getchar();
     fgets(current->question, MAX_STRING_QUESTION, stdin);
     current->question[strcspn(current->question, "\n")] = 0; 
 
