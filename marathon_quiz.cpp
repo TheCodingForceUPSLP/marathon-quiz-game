@@ -60,6 +60,7 @@ Question* createQuestion(int questionId);
 Question* searchQuestion(Question *questionHead, int questionId);
 int getLastQuestionId(Question* questionHead, int idStart);
 void deleteQuestionById(Question **questionHead, int questionId);
+void modifyQuestionById(Question* questionHead, int id);
 void loadQuestionsFromFile(Question** questionHead);
 void saveQuestionsToFile(Question* questionHead);
 void showMenu(int *choice);
@@ -132,24 +133,30 @@ int main(){
             case 5:
                 deletePlayer(&playerHead);        
                 break;
-            case 6:
+            case 6: 
+			    printf("\nEnter the id of the question to modify: ");
+            	scanf("%d",&questionId);
+				modifyQuestionById(questionHead, questionId);
+				saveQuestionsToFile(questionHead);
+            	break;
+            case 7:
             	printf("\nEnter the id of the question to delete: ");
             	scanf("%d",&questionId);
             	deleteQuestionById(&questionHead, questionId);
             	saveQuestionsToFile(questionHead);
             	break;
-            case 7:
+            case 8:
             	categoryMenu(&category);
             	displayQuestionsByCategory(questionHead, category);
             	break;
-            case 8:
+            case 9:
                 printf("\n============================\n");
                 printf("    PROGRAM CREDITS\n");
                 printf("============================\n");
                 printf("Marathon Quiz Game\n");
                 printf("Developed by E13A Group\n\n");
                 break;
-            case 9:
+            case 10:
                 printf("Bye bye ...\n");
                 freeQuestions(questionHead);
                 freePlayers(playerHead);
@@ -175,10 +182,11 @@ void showMenu(int *choice){
     printf("3. Display ranking players\n");   
     printf("4. Rename player\n");
     printf("5. Delete player\n");
-    printf("6. Delete question\n");
-    printf("7. Display questions by category\n");
-    printf("8. Show credits\n");
-    printf("9. Exit\n");
+    printf("6. Modify question by Id\n");
+    printf("7. Delete question\n");
+    printf("8. Display questions by category\n");
+    printf("9. Show credits\n");
+    printf("10. Exit\n");
 
     printf("Select an option: ");
     scanf("%d", choice);
@@ -289,6 +297,42 @@ void deleteQuestionById(Question **questionHead, int questionId) {
     free(current);
     
     printf("\nThe question was correctly deleted");
+}
+
+void modifyQuestionById(Question* questionHead, int id) {
+    if (questionHead == NULL) {
+        printf("The question list is empty.\n");
+        return;
+    }
+
+    // Sherch question by ID
+    Question* current = searchQuestion(questionHead, id);
+    if (current == NULL) {
+        printf("Question with ID %d not found.\n", id);
+        return;
+    }
+    printf("\nModifying question with ID %d...\n", id);
+
+    // Modify
+    printf("Enter new question: ");
+    getchar();
+    fgets(current->question, MAX_STRING_QUESTION, stdin);
+    current->question[strcspn(current->question, "\n")] = 0; 
+
+    // Refresh options
+    for (int i = 0; i < 3; i++) {
+        printf("Enter option %d: ", i + 1);
+        fgets(current->options[i], MAX_STRING_QUESTION, stdin);
+        current->options[i][strcspn(current->options[i], "\n")] = 0; 
+    }
+
+    // check correct answer
+    do {
+        printf("Enter correct answer (1-3): ");
+        scanf("%d", &current->correct_answer);
+        getchar(); // clean buffer
+    } while (current->correct_answer < 1 || current->correct_answer > 3);
+    printf("Question modified successfully.\n");
 }
 
 /*
