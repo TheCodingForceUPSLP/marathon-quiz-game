@@ -300,7 +300,6 @@ void deleteQuestionById(Question **questionHead, int questionId) {
 }
 
 // Modify question by ID
-
 void modifyQuestionById(Question* questionHead, int id, int category) {
     if (questionHead == NULL) {
         printf("The question list is empty.\n");
@@ -386,13 +385,14 @@ void saveQuestionsToFile(Question* questionHead) {
 
     Question* current = questionHead;
     while (current != NULL) {
-        fprintf(file, "%d|%s|%s|%s|%s|%d\n",
+        fprintf(file, "%d|%s|%s|%s|%s|%d|%d\n",
                 current->id,
                 current->question,
                 current->options[0],
                 current->options[1],
                 current->options[2],
-                current->correct_answer);
+                current->correct_answer,
+                current->category);
                 
         current = current->next;
     }
@@ -419,13 +419,14 @@ void loadQuestionsFromFile(Question** questionHead) {
         }
 
         // Parse the line from the file
-        if (sscanf(line, "%d|%[^|]|%[^|]|%[^|]|%[^|]|%d",
-                   &newQuestion->id,
-                   newQuestion->question,
-                   newQuestion->options[0],
-                   newQuestion->options[1],
-                   newQuestion->options[2],
-                   &newQuestion->correct_answer) != 6) {
+        if (sscanf(line, "%d|%[^|]|%[^|]|%[^|]|%[^|]|%d|%d",
+                &newQuestion->id,
+                newQuestion->question,
+                newQuestion->options[0],
+                newQuestion->options[1],
+                newQuestion->options[2],
+                &newQuestion->correct_answer,
+                &newQuestion->category) != 7) {
             printf("Warning: Invalid format in line: %s", line);
             free(newQuestion);
             continue;
