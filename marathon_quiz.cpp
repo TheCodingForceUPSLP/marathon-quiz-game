@@ -60,7 +60,7 @@ Question* createQuestion(int questionId);
 Question* searchQuestion(Question *questionHead, int questionId);
 int getLastQuestionId(Question* questionHead, int idStart);
 void deleteQuestionById(Question **questionHead, int questionId);
-void modifyQuestionById(Question* questionHead, int id);
+void modifyQuestionById(Question* questionHead, int id, int category);
 void loadQuestionsFromFile(Question** questionHead);
 void saveQuestionsToFile(Question* questionHead);
 void showMenu(int *choice);
@@ -136,7 +136,7 @@ int main(){
             case 6: 
 			    printf("\nEnter the id of the question to modify: ");
             	scanf("%d",&questionId);
-				modifyQuestionById(questionHead, questionId);
+				modifyQuestionById(questionHead, questionId, category);
 				saveQuestionsToFile(questionHead);
             	break;
             case 7:
@@ -299,13 +299,15 @@ void deleteQuestionById(Question **questionHead, int questionId) {
     printf("\nThe question was correctly deleted");
 }
 
-void modifyQuestionById(Question* questionHead, int id) {
+// Modify question by ID
+
+void modifyQuestionById(Question* questionHead, int id, int category) {
     if (questionHead == NULL) {
         printf("The question list is empty.\n");
         return;
     }
 
-    // Sherch question by ID
+    // Search question by ID
     Question* current = searchQuestion(questionHead, id);
     if (current == NULL) {
         printf("Question with ID %d not found.\n", id);
@@ -332,6 +334,10 @@ void modifyQuestionById(Question* questionHead, int id) {
         scanf("%d", &current->correct_answer);
         getchar(); // clean buffer
     } while (current->correct_answer < 1 || current->correct_answer > 3);
+
+    // Refresh category
+    categoryMenu(&category);
+    current->category=category;
     printf("Question modified successfully.\n");
 }
 
@@ -387,6 +393,7 @@ void saveQuestionsToFile(Question* questionHead) {
                 current->options[1],
                 current->options[2],
                 current->correct_answer);
+                
         current = current->next;
     }
     fclose(file);
