@@ -532,7 +532,7 @@ void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRo
             updatePlayerIfHigherScore(playerHead,playerName,totalScore);
             //End.
             printf("\nGame Over! You ran out of lives.\n");
-            
+
             // Function to display the bottom 5 scores
             displayBottom5Scores(*playerHead, newPlayer);
         } else if (current == NULL) {
@@ -1065,7 +1065,7 @@ void displayBottom5Scores(Player* playerHead, Player* currentPlayer) {
         temp = playerHead;
         for (int i = 0; i < playerCount; i++) {
             if (temp == currentPlayer) {
-                printf("%d. YOU    - %.0f pts\n", i + 1, temp->maxScore);
+                printf("%d. YOU: %s - %.0f pts\n", i + 1, temp->nickname, temp->maxScore);
             } else {
                 printf("%d. %s - %.0f pts\n", i + 1, temp->nickname, temp->maxScore);
             }
@@ -1119,7 +1119,7 @@ void displayBottom5Scores(Player* playerHead, Player* currentPlayer) {
     // Show the bottom 5 scores, highlighting the current player as "YOU"
     for (int i = 0; i < 5; i++) {
         if (players[i] == currentPlayer) {
-            printf("%d. YOU    - %.0f pts\n", 5 - i, players[i]->maxScore);
+            printf("%d. YOU: %s  - %.0f pts\n", 5 - i, players[i]->nickname, players[i]->maxScore);
         } else {
             printf("%d. %s - %.0f pts\n", 5 - i, players[i]->nickname, players[i]->maxScore);
         }
