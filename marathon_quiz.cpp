@@ -455,7 +455,7 @@ void displayQuestionsInPages(Question* questionHead) {
         int displayCount = 0;
         while (current != NULL && displayCount < questionsPerPage) {
             if (index >= start) {
-                printf("Question %d:\n", index);
+                printf("Question %d:\n", current->id);
                 printf("Text: %s\n", current->question);
                 for (int i = 0; i < 3; i++) {
                     printf("Option %d: %s\n", i + 1, current->options[i]);
