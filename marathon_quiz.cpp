@@ -125,6 +125,7 @@ int main(){
             case 2:
                 playGame(questionHead,&playerHead, &playedRoundHead, &WrongAnswers);
                 savePlayersToFile(playerHead);
+                saveQuestionsToFile(questionHead);
                 break;
             case 3:
             	printPlayers(playerHead);
