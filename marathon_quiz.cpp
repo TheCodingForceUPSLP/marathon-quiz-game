@@ -146,7 +146,8 @@ int main(){
             	displayQuestionsByCategory(questionHead, category);
             	break;
             case 8:
-            	displayQuestionsInPages(Question* questionHead);            	
+            	displayQuestionsInPages(Question* questionHead);  
+				break;          	
             case 9:
                 printf("\n============================\n");
                 printf("    PROGRAM CREDITS\n");
