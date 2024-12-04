@@ -1038,3 +1038,87 @@ void freeListWrongAnswers(wrongAnswer* head) {
         free(temp);  // Free the memory of the node
     }
 }
+
+void displayBottom5Scores(Player* playerHead, Player* currentPlayer) {
+    Player* temp = playerHead;
+    int playerCount = 0;
+ 
+    // Count the number of players
+    while (temp != NULL) {
+        playerCount++;
+        temp = temp->next;
+    }
+ 
+    // If there are 5 or fewer players, display all scores
+    if (playerCount <= 5) {
+        printf("\n==============================\n");
+        printf("Keep practicing! \nHere are some scores to beat:\n\n");
+ 
+        printf("Bottom Scores:\n");
+        temp = playerHead;
+        for (int i = 0; i < playerCount; i++) {
+            if (temp == currentPlayer) {
+                printf("%d. YOU    - %.0f pts\n", i + 1, temp->maxScore);
+            } else {
+                printf("%d. %s - %.0f pts\n", i + 1, temp->nickname, temp->maxScore);
+            }
+            temp = temp->next;
+        }
+        printf("\nDon't give up! Try again!\n");
+        printf("==============================\n");
+        return;
+    }
+ 
+    // If there are more than 5 players, collect players into an array
+    Player* players[10000];  // Temporarily, for the dynamic list
+    temp = playerHead;
+    int index = 0;
+    while (temp != NULL) {
+        players[index++] = temp;
+        temp = temp->next;
+    }
+
+    // Sort players by score
+    for (int i = 0; i < index - 1; i++) {
+        for (int j = i + 1; j < index; j++) {
+            if (players[i]->maxScore > players[j]->maxScore) {
+                Player* tempPlayer = players[i];
+                players[i] = players[j];
+                players[j] = tempPlayer;
+            }
+        }
+    }
+
+    // Check if the current player is among the bottom 5 scores
+    bool isInBottom5 = false;
+    for (int i = 0; i < 5; i++) {
+        if (players[i] == currentPlayer) {
+            isInBottom5 = true;
+            break;
+        }
+    }
+ 
+    // If the current player is not in the bottom 5, do nothing
+    if (!isInBottom5) {
+        return;
+    }
+ 
+    // Display the bottom 5 scores
+    printf("\n==============================\n");
+    printf("Keep practicing! \nHere are some scores to beat:\n\n");
+ 
+    printf("Bottom 5 Scores:\n");
+ 
+    // Show the bottom 5 scores, highlighting the current player as "YOU"
+    for (int i = 0; i < 5; i++) {
+        if (players[i] == currentPlayer) {
+            printf("%d. YOU    - %.0f pts\n", 5 - i, players[i]->maxScore);
+        } else {
+            printf("%d. %s - %.0f pts\n", 5 - i, players[i]->nickname, players[i]->maxScore);
+        }
+    }
+ 
+    // Motivational message
+    printf("\nDon't give up! Try again!\n");
+    printf("==============================\n");
+}
