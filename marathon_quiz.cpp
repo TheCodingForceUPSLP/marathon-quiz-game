@@ -60,7 +60,7 @@ Question* createQuestion(int questionId);
 Question* searchQuestion(Question *questionHead, int questionId);
 int getLastQuestionId(Question* questionHead, int idStart);
 void deleteQuestionById(Question **questionHead, int questionId);
-void modifyQuestionById(Question* questionHead, int id);
+void modifyQuestionById(Question* questionHead, int id, int category);
 void loadQuestionsFromFile(Question** questionHead);
 void saveQuestionsToFile(Question* questionHead);
 void showMenu(int *choice);
@@ -134,10 +134,10 @@ int main(){
                 deletePlayer(&playerHead);        
                 break;
             case 6: 
-			    printf("\nEnter the id of the question to modify: ");
+		printf("\nEnter the id of the question to modify: ");
             	scanf("%d",&questionId);
-				modifyQuestionById(questionHead, questionId);
-				saveQuestionsToFile(questionHead);
+		modifyQuestionById(questionHead, questionId, category);
+		saveQuestionsToFile(questionHead);
             	break;
             case 7:
             	printf("\nEnter the id of the question to delete: ");
@@ -299,13 +299,14 @@ void deleteQuestionById(Question **questionHead, int questionId) {
     printf("\nThe question was correctly deleted");
 }
 
-void modifyQuestionById(Question* questionHead, int id) {
+// Modify question by ID
+void modifyQuestionById(Question* questionHead, int id, int category) {
     if (questionHead == NULL) {
         printf("The question list is empty.\n");
         return;
     }
 
-    // Sherch question by ID
+    // Search question by ID
     Question* current = searchQuestion(questionHead, id);
     if (current == NULL) {
         printf("Question with ID %d not found.\n", id);
@@ -332,6 +333,10 @@ void modifyQuestionById(Question* questionHead, int id) {
         scanf("%d", &current->correct_answer);
         getchar(); // clean buffer
     } while (current->correct_answer < 1 || current->correct_answer > 3);
+
+    // Refresh category
+    categoryMenu(&category);
+    current->category=category;
     printf("Question modified successfully.\n");
 }
 
@@ -380,13 +385,15 @@ void saveQuestionsToFile(Question* questionHead) {
 
     Question* current = questionHead;
     while (current != NULL) {
-        fprintf(file, "%d|%s|%s|%s|%s|%d\n",
+        fprintf(file, "%d|%s|%s|%s|%s|%d|%d\n",
                 current->id,
                 current->question,
                 current->options[0],
                 current->options[1],
                 current->options[2],
-                current->correct_answer);
+                current->correct_answer,
+                current->category);
+                
         current = current->next;
     }
     fclose(file);
@@ -412,13 +419,14 @@ void loadQuestionsFromFile(Question** questionHead) {
         }
 
         // Parse the line from the file
-        if (sscanf(line, "%d|%[^|]|%[^|]|%[^|]|%[^|]|%d",
-                   &newQuestion->id,
-                   newQuestion->question,
-                   newQuestion->options[0],
-                   newQuestion->options[1],
-                   newQuestion->options[2],
-                   &newQuestion->correct_answer) != 6) {
+        if (sscanf(line, "%d|%[^|]|%[^|]|%[^|]|%[^|]|%d|%d",
+                &newQuestion->id,
+                newQuestion->question,
+                newQuestion->options[0],
+                newQuestion->options[1],
+                newQuestion->options[2],
+                &newQuestion->correct_answer,
+                &newQuestion->category) != 7) {
             printf("Warning: Invalid format in line: %s", line);
             free(newQuestion);
             continue;
