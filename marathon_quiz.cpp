@@ -386,14 +386,15 @@ void saveQuestionsToFile(Question* questionHead) {
 
     Question* current = questionHead;
     while (current != NULL) {
-        fprintf(file, "%d|%s|%s|%s|%s|%d|%d\n",
+        fprintf(file, "%d|%s|%s|%s|%s|%d|%d|%d\n",
                 current->id,
                 current->question,
                 current->options[0],
                 current->options[1],
                 current->options[2],
                 current->correct_answer,
-                current->category);
+                current->category,
+				current->wrongCount);
                 
         current = current->next;
     }
