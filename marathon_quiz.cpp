@@ -64,14 +64,17 @@ void modifyQuestionById(Question* questionHead, int id, int category);
 void loadQuestionsFromFile(Question** questionHead);
 void saveQuestionsToFile(Question* questionHead);
 void showMenu(int *choice);
-void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int wrong, int correct);
 
 PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
 void insertPlayedRound(PlayedRound **head, int difficulty, int playerID , int points);
-void freeListWrongAnswers(wrongAnswer* head);
 void addQuestion(Question** questionHead);
 void playGame(Question* questionHead, Player**, PlayedRound**, wrongAnswer**);
 void freeQuestions(Question* questionHead);
+
+//Wrong answers function prototypes definition
+void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int wrong, int correct);
+void displayBottom5Scores(Player* playerHead, Player* currentPlayer);
+void freeListWrongAnswers(wrongAnswer* head);
 
 //Player core function prototype definition
 Player* findPlayerByNickname(Player*,char*);
