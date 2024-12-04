@@ -420,14 +420,15 @@ void loadQuestionsFromFile(Question** questionHead) {
         }
 
         // Parse the line from the file
-        if (sscanf(line, "%d|%[^|]|%[^|]|%[^|]|%[^|]|%d|%d",
+        if (sscanf(line, "%d|%[^|]|%[^|]|%[^|]|%[^|]|%d|%d|%d",
                 &newQuestion->id,
                 newQuestion->question,
                 newQuestion->options[0],
                 newQuestion->options[1],
                 newQuestion->options[2],
                 &newQuestion->correct_answer,
-                &newQuestion->category) != 7) {
+                &newQuestion->category,
+				&newQuestion->wrongCount) != 8) {
             printf("Warning: Invalid format in line: %s", line);
             free(newQuestion);
             continue;
