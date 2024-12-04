@@ -94,7 +94,7 @@ float newScore(int,int);
 void nicknameCreation(char*);
 
 //Funciton for display quetions page
-void displayQuestionsInPages(Question* questionHead)
+void displayQuestionsInPages(Question* questionHead);
 
 //Function for display the rankings
 void printPlayers(Player *head);
