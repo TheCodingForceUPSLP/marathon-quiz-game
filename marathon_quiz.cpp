@@ -64,6 +64,7 @@ void deleteQuestionById(Question **questionHead, int questionId);
 void modifyQuestionById(Question* questionHead, int id, int category);
 void loadQuestionsFromFile(Question** questionHead);
 void saveQuestionsToFile(Question* questionHead);
+void updateWrongCount(Question* questionHead, int questionId);
 void showMenu(int *choice);
 void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int wrong, int correct);
 
@@ -442,6 +443,17 @@ void loadQuestionsFromFile(Question** questionHead) {
     }
 
     fclose(file);
+}
+
+/*
+Add Update Wrong Count by Question Id
+*/
+void updateWrongCount(Question* questionHead,int questionId){
+	Question *auxQuestion = searchQuestion(questionHead, questionId);
+    if (auxQuestion == NULL) {
+        return;
+    }
+	auxQuestion->wrongCount += 1;
 }
 
 /*
