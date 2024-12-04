@@ -532,6 +532,9 @@ void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRo
             updatePlayerIfHigherScore(playerHead,playerName,totalScore);
             //End.
             printf("\nGame Over! You ran out of lives.\n");
+            
+            // Function to display the bottom 5 scores
+            displayBottom5Scores(*playerHead, newPlayer);
         } else if (current == NULL) {
             //Player insertion into the list
             newPlayer=createPlayer(id,playerName,totalScore);
@@ -541,7 +544,11 @@ void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRo
             updatePlayerIfHigherScore(playerHead,playerName,totalScore);
             //End.
             printf("\nCongratulations! You completed all questions!\n");
+            
+            // Function to display the bottom 5 scores
+            displayBottom5Scores(*playerHead, newPlayer);
         }
+
     }
     
     printf("Final score: %d\n", score);
