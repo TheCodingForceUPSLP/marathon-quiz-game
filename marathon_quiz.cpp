@@ -525,9 +525,7 @@ void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRo
             printf("Wrong! Lives remaining: %d\n", lives);
                                             //id 1 to x... questions  get 1 to 3    the correct answer
             InsertWrongAnswer(wrongAnswers, questionNumber, current, answer, current->correct_answer);
-
-
-
+            updateWrongCount(questionHead,current->id);
         }
         
         current = current->next;
