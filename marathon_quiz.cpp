@@ -240,6 +240,7 @@ Question* createQuestion(int questionId) {
     categoryMenu(&category);
     newQuestion->category=category;
     
+    newQuestion->wrongCount=0;
     newQuestion->id = questionId;
     newQuestion->next = NULL;
     return newQuestion;
