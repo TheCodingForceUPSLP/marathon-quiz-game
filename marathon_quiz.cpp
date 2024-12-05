@@ -472,21 +472,19 @@ void displayQuestionsInPages(Question* questionHead) {
             temp = temp->next;
             index++;
         }
-        
+
         // Show questions on current page
-        while (current != NULL && displayCount < questionsPerPage) {
-            if (index >= start && index <= end) {
-                printf("Question %d:\n", current->id);
-                printf("Text: %s\n", current->question);
-                for (int i = 0; i < 3; i++) {
-                    printf("Option %d: %s\n", i + 1, current->options[i]);
-                }
-                printf("Correct Answer: Option %d: %s\n", current->correct_answer, current->options[current->correct_answer - 1]);
-                printf("\n");
-                displayCount++;
+        while (temp != NULL && displayCount < questionsPerPage) {
+            printf("Question ID: %d:\n", temp->id);
+            printf("Question: %s\n", temp->question);
+            for (int i = 0; i < 3; i++) {
+                printf("Option %d: %s\n", i + 1, temp->options[i]);
             }
-            index++;
-            current = current->next;
+            printf("Correct Answer: Option %d: %s\n", temp->correct_answer, temp->options[temp->correct_answer - 1]);
+            printf("\n");
+
+            temp = temp->next;
+            displayCount++;
         }
 		
 		/*Options menu for page or exit*/
