@@ -178,7 +178,7 @@ void displayQuestion(Question* q, int* questionNumber) {
 Logic for marathon game
 */
 void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRound) {
-    int lives = 3;
+    int lives;
     int score = 0;
     int questionNumber = 1;
     Question* current = questionHead;
@@ -199,7 +199,7 @@ void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRo
     //End.
     nicknameCreation(playerName);
     //End.
-    
+
     printf("\nGame started! You have %d lives.\n", lives);
     
     while (current != NULL && lives > 0) {
