@@ -178,7 +178,7 @@ void displayQuestion(Question* q, int* questionNumber) {
 Logic for marathon game
 */
 void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRound) {
-    int lives = 3;
+    int lives;
     int score = 0;
     int questionNumber = 1;
     Question* current = questionHead;
@@ -196,9 +196,39 @@ void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRo
     }else{
         id= getLastId(*playerHead,1000);
     }
-    //End.
     nicknameCreation(playerName);
     //End.
+
+    // Select difficulty
+    int difficulty;
+    printf("\n============================\n");
+    printf("   SELECT THE DIFFICULTY MODE:\n");
+    printf("1. Easy Mode (5 lives)\n");
+    printf("2. Normal Mode (3 lives)\n");
+    printf("3. God Mode (1 life)\n");
+    printf("============================\n");
+    
+    do {
+        printf("Select an option: ");
+        scanf("%d", &difficulty);
+        getchar(); // Clear the newline character
+        if (difficulty < 1 || difficulty > 3) {
+            printf("Invalid option! Please select a number between 1 and 3.\n");
+        }
+    } while (difficulty < 1 || difficulty > 3);
+
+    // Assign lives based on the difficulty
+    switch (difficulty) {
+        case 1:
+            lives = 5;
+            break;
+        case 2:
+            lives = 3;
+            break;
+        case 3:
+            lives = 1;
+            break;
+    }
     
     printf("\nGame started! You have %d lives.\n", lives);
     
