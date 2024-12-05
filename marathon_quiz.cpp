@@ -73,8 +73,8 @@ void playGame(Question* questionHead, Player**, PlayedRound**, WrongAnswer**);
 void freeQuestions(Question* questionHead);
 
 //Wrong Answers core function prototype definition
-void InsertWrongAnswer(WrongAnswer** head, int id, Question* questionHead, int wrong, int correct);
-void freeListWrongAnswers(WrongAnswer* head);
+void InsertWrongAnswer(WrongAnswer** wrongAnswerHead, int id, Question* questionHead, int wrong, int correct);
+void freeListWrongAnswers(WrongAnswer* wrongAnswerHead);
 void updateWrongCount(Question* questionHead, int questionId);
 int getWrongQuestionCount(WrongAnswer* wrongAnswerHead);
 void calculateErrorPercentage(Question* questionHead, int totalQuestions, 
@@ -506,7 +506,7 @@ void displayQuestionsByCategory(Question* head, int category){
 /*
 Logic for marathon game
 */
-void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRound, WrongAnswer** wrongAnswers) {
+void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRound, WrongAnswer** wrongAnswerHead) {
     int lives = 3;
     int score = 0;
     int questionNumber = 1;
@@ -545,7 +545,7 @@ void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRo
             lives--;
             printf("Wrong! Lives remaining: %d\n", lives);
                                             //id 1 to x... questions  get 1 to 3    the correct answer
-            InsertWrongAnswer(wrongAnswers, questionNumber, current, answer, current->correct_answer);
+            InsertWrongAnswer(wrongAnswerHead, questionNumber, current, answer, current->correct_answer);
             updateWrongCount(questionHead,current->id);
         }
         
@@ -1005,7 +1005,7 @@ void loadPlayersFromFile(Player** playerHead) {
 
 }
 
-void InsertWrongAnswer(WrongAnswer** head, int id, Question* questionHead, int wrong, int correct) {
+void InsertWrongAnswer(WrongAnswer** wrongAnswerHead, int id, Question* questionHead, int wrong, int correct) {
     // Search for the question node using the given ID
     Question* questionNode = searchQuestion(questionHead, id);
     if (questionNode == NULL) {
@@ -1048,10 +1048,10 @@ void InsertWrongAnswer(WrongAnswer** head, int id, Question* questionHead, int w
     newNode->prev = NULL;
 
     // Insert the new node at the end of the list
-    if (*head == NULL) { // If the list is empty
-        *head = newNode;
+    if (*wrongAnswerHead == NULL) { // If the list is empty
+        *wrongAnswerHead = newNode;
     } else {
-        WrongAnswer* temp = *head;
+        WrongAnswer* temp = *wrongAnswerHead;
         // Traverse to the last node in the list
         while (temp->next) {
             temp = temp->next;
@@ -1062,11 +1062,11 @@ void InsertWrongAnswer(WrongAnswer** head, int id, Question* questionHead, int w
     }
 }
 
-void freeListWrongAnswers(WrongAnswer* head) {
+void freeListWrongAnswers(WrongAnswer* wrongAnswerHead) {
     WrongAnswer* temp;
-    while (head) {
-        temp = head;
-        head = head->next;
+    while (wrongAnswerHead) {
+        temp = wrongAnswerHead;
+        wrongAnswerHead = wrongAnswerHead->next;
         free(temp);  // Free the memory of the node
     }
 }
