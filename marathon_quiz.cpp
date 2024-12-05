@@ -454,7 +454,7 @@ void displayQuestionsInPages(Question* questionHead) {
         /*Show questions on current page*/
         int displayCount = 0;
         while (current != NULL && displayCount < questionsPerPage) {
-            if (index >= ) {
+            if (index >= start && index <= end) {
                 printf("Question %d:\n", current->id);
                 printf("Text: %s\n", current->question);
                 for (int i = 0; i < 3; i++) {
