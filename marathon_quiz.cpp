@@ -154,12 +154,17 @@ int main(){
             	break;
             case 9:
                 printf("\n============================\n");
+                printf(" Top 5 Hardest Questions \n");
+                printf("============================\n");
+                break;
+            case 10:
+                printf("\n============================\n");
                 printf("    PROGRAM CREDITS\n");
                 printf("============================\n");
                 printf("Marathon Quiz Game\n");
                 printf("Developed by E13A Group\n\n");
                 break;
-            case 10:
+            case 11:
                 printf("Bye bye ...\n");
                 freeQuestions(questionHead);
                 freePlayers(playerHead);
@@ -188,8 +193,9 @@ void showMenu(int *choice){
     printf("6. Modify question by Id\n");
     printf("7. Delete question\n");
     printf("8. Display questions by category\n");
-    printf("9. Show credits\n");
-    printf("10. Exit\n");
+    printf("9. Display Top 5 Failed Questions\n");
+    printf("10. Show credits\n");
+    printf("111. Exit\n");
 
     printf("Select an option: ");
     scanf("%d", choice);
