@@ -118,6 +118,10 @@ int main(){
     int questionId = 0;
     int category= 0;
 
+    int totalWrongQuestions;
+    float topErrorPercentages[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
+    int topErrorQuestionIds[5] = {-1, -1, -1, -1, -1};
+
     loadPlayersFromFile(&playerHead);
     loadQuestionsFromFile(&questionHead);
     while(1){
@@ -162,12 +166,9 @@ int main(){
                 printf("\n============================\n");
                 printf(" Top 5 Hardest Questions \n");
                 printf("============================\n");
-                float topErrorPercentages[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
-                int topErrorQuestionIds[5] = {-1, -1, -1, -1, -1};
-                int totalWrongQuestions = getWrongQuestionCount(wrongAnswerHead);
+                totalWrongQuestions = getWrongQuestionCount(wrongAnswerHead);
                 calculateErrorPercentage(questionHead, totalWrongQuestions, 
-                                            topErrorPercentages, topErrorQuestionIds);
-                
+                                            topErrorPercentages, topErrorQuestionIds); 
                 displayTop5FailedQuestions(questionHead,topErrorPercentages, topErrorQuestionIds);
                 break;
             case 10:
