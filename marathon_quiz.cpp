@@ -47,14 +47,14 @@ typedef struct PlayedRound{
 }PlayedRound;
 
 // Definition of the doubly linked list node structure
-typedef struct wrongAnswer {
+typedef struct WrongAnswer {
     int IdQuestion;               // Stores the question number, like 1, 2, 3...x
     char Question[MAX_STRING_QUESTION];           // Stores the wrong question from the main question node
     char wrongAnswer[MAX_STRING_QUESTION];        // Stores the wrong answer (A, B, C, D, and the answer)
     char correctAnswer[MAX_STRING_QUESTION];      // Stores the correct answer from the main question node
-    struct wrongAnswer* next;     // Points to the next node
-    struct wrongAnswer* prev;     // Points to the previous node
-} wrongAnswer;
+    struct WrongAnswer* next;     // Points to the next node
+    struct WrongAnswer* prev;     // Points to the previous node
+} WrongAnswer;
 
 // Function prototypes
 Question* createQuestion(int questionId);
@@ -64,19 +64,26 @@ void deleteQuestionById(Question **questionHead, int questionId);
 void modifyQuestionById(Question* questionHead, int id, int category);
 void loadQuestionsFromFile(Question** questionHead);
 void saveQuestionsToFile(Question* questionHead);
-void updateWrongCount(Question* questionHead, int questionId);
 void showMenu(int *choice);
 
 PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
 void insertPlayedRound(PlayedRound **head, int difficulty, int playerID , int points);
+void displayPlayedRounds(playedRoundHead);
 void addQuestion(Question** questionHead);
-void playGame(Question* questionHead, Player**, PlayedRound**, wrongAnswer**);
+void playGame(Question* questionHead, Player**, PlayedRound**, WrongAnswer**);
 void freeQuestions(Question* questionHead);
 
-//Wrong answers function prototypes definition
-void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int wrong, int correct);
+//Wrong Answers core function prototype definition
+void InsertWrongAnswer(WrongAnswer** wrongAnswerHead, int id, Question* questionHead, int wrong, int correct);
+void freeListWrongAnswers(WrongAnswer* wrongAnswerHead);
+void updateWrongCount(Question* questionHead, int questionId);
+int getWrongQuestionCount(WrongAnswer* wrongAnswerHead);
+void calculateErrorPercentage(Question* questionHead, int totalQuestions, 
+                                float *topErrorPercentages, int *topErrorQuestionIds);
+void displayTop5FailedQuestions(Question* questionHead, float *topErrorPercentages, int *topErrorQuestionIds);
 void displayBottom5Scores(Player* playerHead, Player* currentPlayer);
-void freeListWrongAnswers(wrongAnswer* head);
+void saveWrongAnswersToFile(WrongAnswer* wrongAnswerHead);
+void loadWrongAnswersFromFile(WrongAnswer** wrongAnswerHead);
 
 //Player core function prototype definition
 Player* findPlayerByNickname(Player*,char*);
@@ -106,7 +113,7 @@ void categoryMenu(int *category);
 void displayQuestionsByCategory(Question* head, int category);
 
 int main(){
-    wrongAnswer* WrongAnswers = NULL;
+    WrongAnswer* wrongAnswerHead = NULL;
     Question* questionHead = NULL;
     Player *playerHead=NULL;
     PlayedRound* playedRoundHead = NULL;
@@ -115,8 +122,13 @@ int main(){
     int questionId = 0;
     int category= 0;
 
+    int totalWrongQuestions;
+    float topErrorPercentages[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
+    int topErrorQuestionIds[5] = {-1, -1, -1, -1, -1};
+
     loadPlayersFromFile(&playerHead);
     loadQuestionsFromFile(&questionHead);
+    loadWrongAnswersFromFile(&wrongAnswerHead);
     while(1){
         showMenu(&choice);
         switch (choice)
@@ -126,9 +138,10 @@ int main(){
                 saveQuestionsToFile(questionHead);
                 break;
             case 2:
-                playGame(questionHead,&playerHead, &playedRoundHead, &WrongAnswers);
+                playGame(questionHead,&playerHead, &playedRoundHead, &wrongAnswerHead);
                 savePlayersToFile(playerHead);
                 saveQuestionsToFile(questionHead);
+                saveWrongAnswersToFile(wrongAnswerHead);
                 break;
             case 3:
             	printPlayers(playerHead);
@@ -140,10 +153,10 @@ int main(){
                 deletePlayer(&playerHead);        
                 break;
             case 6: 
-		printf("\nEnter the id of the question to modify: ");
+		        printf("\nEnter the id of the question to modify: ");
             	scanf("%d",&questionId);
-		modifyQuestionById(questionHead, questionId, category);
-		saveQuestionsToFile(questionHead);
+		        modifyQuestionById(questionHead, questionId, category);
+		        saveQuestionsToFile(questionHead);
             	break;
             case 7:
             	printf("\nEnter the id of the question to delete: ");
@@ -157,18 +170,30 @@ int main(){
             	break;
             case 9:
                 printf("\n============================\n");
+                printf(" Top 5 Hardest Questions \n");
+                printf("============================\n");
+                totalWrongQuestions = getWrongQuestionCount(wrongAnswerHead);
+                calculateErrorPercentage(questionHead, totalWrongQuestions, 
+                                            topErrorPercentages, topErrorQuestionIds); 
+                displayTop5FailedQuestions(questionHead,topErrorPercentages, topErrorQuestionIds);
+                break;
+            case 10:
+                printf("\n============================\n");
                 printf("    PROGRAM CREDITS\n");
                 printf("============================\n");
                 printf("Marathon Quiz Game\n");
                 printf("Developed by E13A Group\n\n");
                 break;
-            case 10:
+            case 11:
                 printf("Bye bye ...\n");
                 freeQuestions(questionHead);
                 freePlayers(playerHead);
-                freeListWrongAnswers(WrongAnswers);
+                freeListWrongAnswers(wrongAnswerHead);
                 return 0;
                 break;
+	     case 12:
+		displayPlayedRounds(playedRoundHead);
+		break;
             default:
                 printf("Invalid choice!\n");
                 break;
@@ -191,8 +216,9 @@ void showMenu(int *choice){
     printf("6. Modify question by Id\n");
     printf("7. Delete question\n");
     printf("8. Display questions by category\n");
-    printf("9. Show credits\n");
-    printf("10. Exit\n");
+    printf("9. Display Top 5 Failed Questions\n");
+    printf("10. Show credits\n");
+    printf("11. Exit\n");
 
     printf("Select an option: ");
     scanf("%d", choice);
@@ -489,7 +515,7 @@ void displayQuestionsByCategory(Question* head, int category){
 /*
 Logic for marathon game
 */
-void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRound, wrongAnswer** wrongAnswers) {
+void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRound, WrongAnswer** wrongAnswerHead) {
     int lives = 3;
     int score = 0;
     int questionNumber = 1;
@@ -528,7 +554,7 @@ void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRo
             lives--;
             printf("Wrong! Lives remaining: %d\n", lives);
                                             //id 1 to x... questions  get 1 to 3    the correct answer
-            InsertWrongAnswer(wrongAnswers, questionNumber, current, answer, current->correct_answer);
+            InsertWrongAnswer(wrongAnswerHead, questionNumber, current, answer, current->correct_answer);
             updateWrongCount(questionHead,current->id);
         }
         
@@ -624,6 +650,85 @@ void insertPlayedRound(PlayedRound **head, int difficulty, int playerID, int poi
 	newRound->next = current->next;
 	current->next = newRound; 
 	
+}
+
+/*
+Display Played Rounds
+*/
+void displayPlayedRounds(PlayedRound* playedRoundHead) {
+    if (playedRoundHead == NULL) {
+        printf("\nNo rounds played yet.\n");
+        return;
+    }
+
+    int selectedMode;
+    do {
+        printf("\nSelect game mode to view:\n");
+        printf("1. Easy Mode\n2. Normal Mode\n3. God Mode\n");
+        printf("Enter your choice (1-3): ");
+        scanf("%d", &selectedMode);
+    } while (selectedMode < 1 || selectedMode > 3);
+
+    // Filter and count rounds for the selected mode
+    PlayedRound* current = playedRoundHead;
+    PlayedRound* filteredRounds[1000]; // Temporary array for filtered rounds
+    int count = 0;
+
+    while (current != NULL) {
+        if (current->difficulty == selectedMode) {
+            filteredRounds[count++] = current;
+        }
+        current = current->next;
+    }
+    if (count == 0) {
+        printf("\nNo rounds found for the selected mode.\n");
+        return;
+    }
+    // Sort the filtered rounds by score (descending)
+    for (int i = 0; i < count - 1; i++) {
+        for (int j = 0; j < count - i - 1; j++) {
+            if (filteredRounds[j]->points < filteredRounds[j + 1]->points) {
+                PlayedRound* temp = filteredRounds[j];
+                filteredRounds[j] = filteredRounds[j + 1];
+                filteredRounds[j + 1] = temp;
+            }
+        }
+    }
+    // Pagination system
+    int roundsPerPage = 5;
+    int totalPages = ceil((float)count / roundsPerPage);
+    int currentPage = 1;
+
+    while (1) {
+        system("cls");
+        printf("\n==============================\n");
+        printf("PLAYED ROUNDS - %s (PAGE %d of %d)\n",
+               selectedMode == 1 ? "Easy Mode" : selectedMode == 2 ? "Normal Mode" : "God Mode",
+               currentPage, totalPages);
+        printf("==============================\n");
+        int start = (currentPage - 1) * roundsPerPage;
+        int end = start + roundsPerPage;
+
+        for (int i = start; i < end && i < count; i++) {
+            printf("%d. Player ID: %d | Points: %d\n", i + 1, filteredRounds[i]->playerID, filteredRounds[i]->points);
+        }
+        printf("==============================\n");
+        printf("1. Previous Page\n2. Next Page\n3. Exit\n");
+        printf("Enter your choice: ");
+        
+        int option;
+        scanf("%d", &option);
+        if (option == 1 && currentPage > 1) {
+            currentPage--;
+        } else if (option == 2 && currentPage < totalPages) {
+            currentPage++;
+        } else if (option == 3) {
+            system("cls");
+            break;
+        } else {
+            printf("Invalid choice. Try again.\n");
+        }
+    }
 }
 
 
@@ -995,7 +1100,7 @@ void loadPlayersFromFile(Player** playerHead) {
 
 }
 
-void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int wrong, int correct) {
+void InsertWrongAnswer(WrongAnswer** wrongAnswerHead, int id, Question* questionHead, int wrong, int correct) {
     // Search for the question node using the given ID
     Question* questionNode = searchQuestion(questionHead, id);
     if (questionNode == NULL) {
@@ -1004,7 +1109,7 @@ void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int w
     }
 
     // Allocate memory for the new wrongAnswer node
-    wrongAnswer* newNode = (wrongAnswer*)malloc(sizeof(wrongAnswer));
+    WrongAnswer* newNode = (WrongAnswer*)malloc(sizeof(WrongAnswer));
     if (!newNode) { // Check if memory allocation was successful
         perror("Failed to allocate memory");
         exit(EXIT_FAILURE);
@@ -1038,10 +1143,10 @@ void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int w
     newNode->prev = NULL;
 
     // Insert the new node at the end of the list
-    if (*head == NULL) { // If the list is empty
-        *head = newNode;
+    if (*wrongAnswerHead == NULL) { // If the list is empty
+        *wrongAnswerHead = newNode;
     } else {
-        wrongAnswer* temp = *head;
+        WrongAnswer* temp = *wrongAnswerHead;
         // Traverse to the last node in the list
         while (temp->next) {
             temp = temp->next;
@@ -1052,13 +1157,149 @@ void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int w
     }
 }
 
-void freeListWrongAnswers(wrongAnswer* head) {
-    wrongAnswer* temp;
-    while (head) {
-        temp = head;
-        head = head->next;
+void freeListWrongAnswers(WrongAnswer* wrongAnswerHead) {
+    WrongAnswer* temp;
+    while (wrongAnswerHead) {
+        temp = wrongAnswerHead;
+        wrongAnswerHead = wrongAnswerHead->next;
         free(temp);  // Free the memory of the node
     }
+}
+
+int getWrongQuestionCount(WrongAnswer* wrongAnswerHead){
+    int totalQuestions = 0;
+    WrongAnswer* tempWrongQuestion = wrongAnswerHead;
+
+    while (tempWrongQuestion) {
+        totalQuestions++;
+        tempWrongQuestion = tempWrongQuestion->next;
+    }
+
+    return totalQuestions;
+}
+
+void calculateErrorPercentage(Question* questionHead, int totalQuestions, float *topErrorPercentages, int *topErrorQuestionIds){
+    Question* tempQuestion = questionHead;
+    float currentErrorPercentage;
+    int currentIdQuestion;
+    while (tempQuestion) {
+        currentErrorPercentage = ((float)tempQuestion->wrongCount / (float)totalQuestions);
+        currentIdQuestion = tempQuestion->id;
+        //check if this percentage belongs to top 5
+        for(int i = 0; i < 5; i++){
+            if(currentErrorPercentage > topErrorPercentages[i]) {
+                //shift lower percentages down
+                for(int j = 4; j > i; j--){
+                    topErrorPercentages[j] = topErrorPercentages[j - 1];
+                    topErrorQuestionIds[j] = topErrorQuestionIds[j - 1];
+                }
+                //insert the new top percentage
+                topErrorPercentages[i] = currentErrorPercentage;
+                topErrorQuestionIds[i] = currentIdQuestion;
+                break;
+            }
+        }
+        tempQuestion = tempQuestion->next;
+    }
+}
+
+void displayTop5FailedQuestions(Question* questionHead, float *topErrorPercentages, int *topErrorQuestionIds){
+    for(int i=0; i < 5; i++){
+        if(topErrorPercentages[i] > 0){
+            Question *tempQuestion = questionHead;
+            while(tempQuestion){
+                if(tempQuestion->id == topErrorQuestionIds[i]){
+                    printf("Question ID: %d\n", tempQuestion->id);
+                    printf("Question: %s\n", tempQuestion->question);
+                    printf("Error Percentage: %.2f%%\n", topErrorPercentages[i]*100);
+                    printf("----------------------------\n");
+                    break;
+                }
+                tempQuestion = tempQuestion->next;
+            }
+        }
+    }
+}
+
+/*
+Save the WrongAnswers to a file with | as the separator.
+*/
+void saveWrongAnswersToFile(WrongAnswer* wrongAnswerHead) {
+    FILE* file = fopen("wrong_answers.txt", "w");
+    if (file == NULL) {
+        perror("Failed to open file for writing");
+        return;
+    }
+
+    WrongAnswer* current = wrongAnswerHead;
+    while (current != NULL) {
+        // Write wrong answer data in the format: id|question|wrongAnswer|correctAnswer
+        fprintf(file, "%d|%s|%s|%s\n",
+                current->IdQuestion,
+                current->Question,
+                current->wrongAnswer,
+                current->correctAnswer);
+        current = current->next;
+    }
+
+    fclose(file);
+    printf("Wrong answers saved successfully to 'wrong_answers.txt'.\n");
+}
+
+/*
+Load the WrongAnswers from a file with | as the separator.
+*/
+void loadWrongAnswersFromFile(WrongAnswer** wrongAnswerHead) {
+    FILE* file = fopen("wrong_answers.txt", "r");
+    if (file == NULL) {
+        perror("Failed to open file for reading");
+        return;
+    }
+
+    char line[512];
+    while (fgets(line, sizeof(line), file)) {
+        int id;
+        char question[MAX_STRING_QUESTION];
+        char wrongAnswer[MAX_STRING_QUESTION];
+        char correctAnswer[MAX_STRING_QUESTION];
+
+        // Parse the line using | as the delimiter
+        if (sscanf(line, "%d|%[^|]|%[^|]|%[^\n]",
+                   &id, question, wrongAnswer, correctAnswer) == 4) {
+            // Create a new WrongAnswer node
+            WrongAnswer* newNode = (WrongAnswer*)malloc(sizeof(WrongAnswer));
+            if (newNode == NULL) {
+                printf("Error: Could not allocate memory while loading wrong answers.\n");
+                fclose(file);
+                return;
+            }
+
+            // Assign values to the new node
+            newNode->IdQuestion = id;
+            strcpy(newNode->Question, question);
+            strcpy(newNode->wrongAnswer, wrongAnswer);
+            strcpy(newNode->correctAnswer, correctAnswer);
+            newNode->next = NULL;
+            newNode->prev = NULL;
+
+            // Insert the new node at the end of the list
+            if (*wrongAnswerHead == NULL) {
+                *wrongAnswerHead = newNode;
+            } else {
+                WrongAnswer* temp = *wrongAnswerHead;
+                while (temp->next != NULL) {
+                    temp = temp->next;
+                }
+                temp->next = newNode;
+                newNode->prev = temp;
+            }
+        } else {
+            printf("Invalid format in line: %s", line);
+        }
+    }
+
+    fclose(file);
+    printf("Wrong answers loaded successfully from 'wrong_answers.txt'.\n");
 }
 
 void displayBottom5Scores(Player* playerHead, Player* currentPlayer) {
