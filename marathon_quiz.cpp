@@ -79,6 +79,7 @@ void freeQuestions(Question* questionHead);
 int getWrongQuestionCount(wrongAnswer* wrongAnswerHead);
 void calculateErrorPercentage(Question* questionHead, int totalQuestions, 
                                 float *topErrorPercentages, int *topErrorQuestionIds);
+void displayTop5FailedQuestions(Question* questionHead, float *topErrorPercentages, int *topErrorQuestionIds);
 
 //Player core function prototype definition
 Player* findPlayerByNickname(Player*,char*);
@@ -1104,5 +1105,23 @@ void calculateErrorPercentage(Question* questionHead, int totalQuestions, float 
             }
         }
         tempQuestion = tempQuestion->next;
+    }
+}
+
+void displayTop5FailedQuestions(Question* questionHead, float *topErrorPercentages, int *topErrorQuestionIds){
+    for(int i=0; i < 5; i++){
+        if(topErrorPercentages[i] > 0){
+            Question *tempQuestion = questionHead;
+            while(tempQuestion){
+                if(tempQuestion->id == topErrorQuestionIds[i]){
+                    printf("Question ID: %d\n", tempQuestion->id);
+                    printf("Question: %s\n", tempQuestion->question);
+                    printf("Error Percentage: %.2f%%\n", topErrorPercentages[i]);
+                    printf("----------------------------\n");
+                    break;
+                }
+                tempQuestion = tempQuestion->next;
+            }
+        }
     }
 }
