@@ -80,6 +80,8 @@ int getWrongQuestionCount(WrongAnswer* wrongAnswerHead);
 void calculateErrorPercentage(Question* questionHead, int totalQuestions, 
                                 float *topErrorPercentages, int *topErrorQuestionIds);
 void displayTop5FailedQuestions(Question* questionHead, float *topErrorPercentages, int *topErrorQuestionIds);
+void saveWrongAnswersToFile(WrongAnswer* wrongAnswerHead);
+void loadWrongAnswersFromFile(WrongAnswer** wrongAnswerHead);
 
 //Player core function prototype definition
 Player* findPlayerByNickname(Player*,char*);
@@ -124,6 +126,7 @@ int main(){
 
     loadPlayersFromFile(&playerHead);
     loadQuestionsFromFile(&questionHead);
+    loadWrongAnswersFromFile(&wrongAnswerHead);
     while(1){
         showMenu(&choice);
         switch (choice)
@@ -136,6 +139,7 @@ int main(){
                 playGame(questionHead,&playerHead, &playedRoundHead, &wrongAnswerHead);
                 savePlayersToFile(playerHead);
                 saveQuestionsToFile(questionHead);
+                saveWrongAnswersToFile(wrongAnswerHead);
                 break;
             case 3:
             	printPlayers(playerHead);
@@ -1125,4 +1129,85 @@ void displayTop5FailedQuestions(Question* questionHead, float *topErrorPercentag
             }
         }
     }
+}
+
+/*
+Save the WrongAnswers to a file with | as the separator.
+*/
+void saveWrongAnswersToFile(WrongAnswer* wrongAnswerHead) {
+    FILE* file = fopen("wrong_answers.txt", "w");
+    if (file == NULL) {
+        perror("Failed to open file for writing");
+        return;
+    }
+
+    WrongAnswer* current = wrongAnswerHead;
+    while (current != NULL) {
+        // Write wrong answer data in the format: id|question|wrongAnswer|correctAnswer
+        fprintf(file, "%d|%s|%s|%s\n",
+                current->IdQuestion,
+                current->Question,
+                current->wrongAnswer,
+                current->correctAnswer);
+        current = current->next;
+    }
+
+    fclose(file);
+    printf("Wrong answers saved successfully to 'wrong_answers.txt'.\n");
+}
+
+/*
+Load the WrongAnswers from a file with | as the separator.
+*/
+void loadWrongAnswersFromFile(WrongAnswer** wrongAnswerHead) {
+    FILE* file = fopen("wrong_answers.txt", "r");
+    if (file == NULL) {
+        perror("Failed to open file for reading");
+        return;
+    }
+
+    char line[512];
+    while (fgets(line, sizeof(line), file)) {
+        int id;
+        char question[MAX_STRING_QUESTION];
+        char wrongAnswer[MAX_STRING_QUESTION];
+        char correctAnswer[MAX_STRING_QUESTION];
+
+        // Parse the line using | as the delimiter
+        if (sscanf(line, "%d|%[^|]|%[^|]|%[^\n]",
+                   &id, question, wrongAnswer, correctAnswer) == 4) {
+            // Create a new WrongAnswer node
+            WrongAnswer* newNode = (WrongAnswer*)malloc(sizeof(WrongAnswer));
+            if (newNode == NULL) {
+                printf("Error: Could not allocate memory while loading wrong answers.\n");
+                fclose(file);
+                return;
+            }
+
+            // Assign values to the new node
+            newNode->IdQuestion = id;
+            strcpy(newNode->Question, question);
+            strcpy(newNode->wrongAnswer, wrongAnswer);
+            strcpy(newNode->correctAnswer, correctAnswer);
+            newNode->next = NULL;
+            newNode->prev = NULL;
+
+            // Insert the new node at the end of the list
+            if (*wrongAnswerHead == NULL) {
+                *wrongAnswerHead = newNode;
+            } else {
+                WrongAnswer* temp = *wrongAnswerHead;
+                while (temp->next != NULL) {
+                    temp = temp->next;
+                }
+                temp->next = newNode;
+                newNode->prev = temp;
+            }
+        } else {
+            printf("Invalid format in line: %s", line);
+        }
+    }
+
+    fclose(file);
+    printf("Wrong answers loaded successfully from 'wrong_answers.txt'.\n");
 }
