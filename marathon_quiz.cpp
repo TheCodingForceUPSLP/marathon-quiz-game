@@ -487,7 +487,7 @@ void displayQuestionsInPages(Question* questionHead) {
             displayCount++;
         }
 		
-		/*Options menu for page or exit*/
+		// Options menu for page or exit
         printf("===============================\n");
         printf("1. Previous Page\n");
         printf("2. Next Page\n");
@@ -496,14 +496,22 @@ void displayQuestionsInPages(Question* questionHead) {
         int option = 0;
         scanf("%d", &option);
 
-        if (option == 1 && currentPage > 1) {
-            currentPage--;
-        } else if (option == 2 && currentPage < totalPages) {
-            currentPage++;
-        } else if (option == 3) {
+        if (option == 1) { // Previous page
+            if (currentPage > 1) {
+                currentPage--;
+            } else {
+                printf("Already on the first page.\n");
+            }
+        } else if (option == 2) { // Next page
+            if (currentPage < totalPages) {
+                currentPage++;
+            } else {
+                printf("Already on the last page.\n");
+            }
+        } else if (option == 3) { // Exit
             break;
         } else {
-            printf("Try again.\n");
+            printf("Invalid option. Please try again.\n");
         }
     }
 }
