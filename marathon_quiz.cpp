@@ -47,14 +47,14 @@ typedef struct PlayedRound{
 }PlayedRound;
 
 // Definition of the doubly linked list node structure
-typedef struct wrongAnswer {
+typedef struct WrongAnswer {
     int IdQuestion;               // Stores the question number, like 1, 2, 3...x
     char Question[MAX_STRING_QUESTION];           // Stores the wrong question from the main question node
     char wrongAnswer[MAX_STRING_QUESTION];        // Stores the wrong answer (A, B, C, D, and the answer)
     char correctAnswer[MAX_STRING_QUESTION];      // Stores the correct answer from the main question node
-    struct wrongAnswer* next;     // Points to the next node
-    struct wrongAnswer* prev;     // Points to the previous node
-} wrongAnswer;
+    struct WrongAnswer* next;     // Points to the next node
+    struct WrongAnswer* prev;     // Points to the previous node
+} WrongAnswer;
 
 // Function prototypes
 Question* createQuestion(int questionId);
@@ -69,14 +69,14 @@ void showMenu(int *choice);
 PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
 void insertPlayedRound(PlayedRound **head, int difficulty, int playerID , int points);
 void addQuestion(Question** questionHead);
-void playGame(Question* questionHead, Player**, PlayedRound**, wrongAnswer**);
+void playGame(Question* questionHead, Player**, PlayedRound**, WrongAnswer**);
 void freeQuestions(Question* questionHead);
 
 //Wrong Answers core function prototype definition
-void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int wrong, int correct);
-void freeListWrongAnswers(wrongAnswer* head);
+void InsertWrongAnswer(WrongAnswer** head, int id, Question* questionHead, int wrong, int correct);
+void freeListWrongAnswers(WrongAnswer* head);
 void updateWrongCount(Question* questionHead, int questionId);
-int getWrongQuestionCount(wrongAnswer* wrongAnswerHead);
+int getWrongQuestionCount(WrongAnswer* wrongAnswerHead);
 void calculateErrorPercentage(Question* questionHead, int totalQuestions, 
                                 float *topErrorPercentages, int *topErrorQuestionIds);
 void displayTop5FailedQuestions(Question* questionHead, float *topErrorPercentages, int *topErrorQuestionIds);
@@ -109,7 +109,7 @@ void categoryMenu(int *category);
 void displayQuestionsByCategory(Question* head, int category);
 
 int main(){
-    wrongAnswer* wrongAnswerHead = NULL;
+    WrongAnswer* wrongAnswerHead = NULL;
     Question* questionHead = NULL;
     Player *playerHead=NULL;
     PlayedRound* playedRoundHead = NULL;
@@ -506,7 +506,7 @@ void displayQuestionsByCategory(Question* head, int category){
 /*
 Logic for marathon game
 */
-void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRound, wrongAnswer** wrongAnswers) {
+void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRound, WrongAnswer** wrongAnswers) {
     int lives = 3;
     int score = 0;
     int questionNumber = 1;
@@ -1005,7 +1005,7 @@ void loadPlayersFromFile(Player** playerHead) {
 
 }
 
-void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int wrong, int correct) {
+void InsertWrongAnswer(WrongAnswer** head, int id, Question* questionHead, int wrong, int correct) {
     // Search for the question node using the given ID
     Question* questionNode = searchQuestion(questionHead, id);
     if (questionNode == NULL) {
@@ -1014,7 +1014,7 @@ void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int w
     }
 
     // Allocate memory for the new wrongAnswer node
-    wrongAnswer* newNode = (wrongAnswer*)malloc(sizeof(wrongAnswer));
+    WrongAnswer* newNode = (WrongAnswer*)malloc(sizeof(WrongAnswer));
     if (!newNode) { // Check if memory allocation was successful
         perror("Failed to allocate memory");
         exit(EXIT_FAILURE);
@@ -1051,7 +1051,7 @@ void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int w
     if (*head == NULL) { // If the list is empty
         *head = newNode;
     } else {
-        wrongAnswer* temp = *head;
+        WrongAnswer* temp = *head;
         // Traverse to the last node in the list
         while (temp->next) {
             temp = temp->next;
@@ -1062,8 +1062,8 @@ void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int w
     }
 }
 
-void freeListWrongAnswers(wrongAnswer* head) {
-    wrongAnswer* temp;
+void freeListWrongAnswers(WrongAnswer* head) {
+    WrongAnswer* temp;
     while (head) {
         temp = head;
         head = head->next;
@@ -1072,9 +1072,9 @@ void freeListWrongAnswers(wrongAnswer* head) {
 }
 
 
-int getWrongQuestionCount(wrongAnswer* wrongAnswerHead){
+int getWrongQuestionCount(WrongAnswer* wrongAnswerHead){
     int totalQuestions = 0;
-    wrongAnswer* tempWrongQuestion = wrongAnswerHead;
+    WrongAnswer* tempWrongQuestion = wrongAnswerHead;
 
     while (tempWrongQuestion) {
         totalQuestions++;
