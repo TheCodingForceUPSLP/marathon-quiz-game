@@ -35,6 +35,7 @@ typedef struct Question {
 	char question[MAX_STRING_QUESTION];
     char options[3][MAX_STRING_QUESTION];
     int correct_answer;
+    int wrongCount;
     struct Question* next;
 } Question;
 
@@ -63,6 +64,7 @@ void deleteQuestionById(Question **questionHead, int questionId);
 void modifyQuestionById(Question* questionHead, int id, int category);
 void loadQuestionsFromFile(Question** questionHead);
 void saveQuestionsToFile(Question* questionHead);
+void updateWrongCount(Question* questionHead, int questionId);
 void showMenu(int *choice);
 
 PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
@@ -126,6 +128,7 @@ int main(){
             case 2:
                 playGame(questionHead,&playerHead, &playedRoundHead, &WrongAnswers);
                 savePlayersToFile(playerHead);
+                saveQuestionsToFile(questionHead);
                 break;
             case 3:
             	printPlayers(playerHead);
@@ -242,6 +245,7 @@ Question* createQuestion(int questionId) {
     categoryMenu(&category);
     newQuestion->category=category;
     
+    newQuestion->wrongCount=0;
     newQuestion->id = questionId;
     newQuestion->next = NULL;
     return newQuestion;
@@ -388,14 +392,15 @@ void saveQuestionsToFile(Question* questionHead) {
 
     Question* current = questionHead;
     while (current != NULL) {
-        fprintf(file, "%d|%s|%s|%s|%s|%d|%d\n",
+        fprintf(file, "%d|%s|%s|%s|%s|%d|%d|%d\n",
                 current->id,
                 current->question,
                 current->options[0],
                 current->options[1],
                 current->options[2],
                 current->correct_answer,
-                current->category);
+                current->category,
+				current->wrongCount);
                 
         current = current->next;
     }
@@ -422,14 +427,15 @@ void loadQuestionsFromFile(Question** questionHead) {
         }
 
         // Parse the line from the file
-        if (sscanf(line, "%d|%[^|]|%[^|]|%[^|]|%[^|]|%d|%d",
+        if (sscanf(line, "%d|%[^|]|%[^|]|%[^|]|%[^|]|%d|%d|%d",
                 &newQuestion->id,
                 newQuestion->question,
                 newQuestion->options[0],
                 newQuestion->options[1],
                 newQuestion->options[2],
                 &newQuestion->correct_answer,
-                &newQuestion->category) != 7) {
+                &newQuestion->category,
+				&newQuestion->wrongCount) != 8) {
             printf("Warning: Invalid format in line: %s", line);
             free(newQuestion);
             continue;
@@ -441,6 +447,17 @@ void loadQuestionsFromFile(Question** questionHead) {
     }
 
     fclose(file);
+}
+
+/*
+Add Update Wrong Count by Question Id
+*/
+void updateWrongCount(Question* questionHead,int questionId){
+	Question *auxQuestion = searchQuestion(questionHead, questionId);
+    if (auxQuestion == NULL) {
+        return;
+    }
+	auxQuestion->wrongCount += 1;
 }
 
 /*
@@ -512,9 +529,7 @@ void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRo
             printf("Wrong! Lives remaining: %d\n", lives);
                                             //id 1 to x... questions  get 1 to 3    the correct answer
             InsertWrongAnswer(wrongAnswers, questionNumber, current, answer, current->correct_answer);
-
-
-
+            updateWrongCount(questionHead,current->id);
         }
         
         current = current->next;
