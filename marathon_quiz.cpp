@@ -421,10 +421,16 @@ void displayQuestionsByCategory(Question* head, int category){
 	if(found!=1) printf("\nThere are no questions in this category\n" );
 	printf("\n");
 }
+
 /*
 Display questions page
 */
 void displayQuestionsInPages(Question* questionHead) {
+    if (questionHead == NULL) {
+        printf("No questions to display.\n");
+        return;
+    }
+    
     int currentPage = 1;
     int questionsPerPage = 5;
     Question* current = questionHead;
@@ -488,6 +494,7 @@ void displayQuestionsInPages(Question* questionHead) {
         }
     }
 }
+
 /*
 Logic for marathon game
 */
