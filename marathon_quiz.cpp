@@ -64,18 +64,18 @@ void deleteQuestionById(Question **questionHead, int questionId);
 void modifyQuestionById(Question* questionHead, int id, int category);
 void loadQuestionsFromFile(Question** questionHead);
 void saveQuestionsToFile(Question* questionHead);
-void updateWrongCount(Question* questionHead, int questionId);
 void showMenu(int *choice);
-void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int wrong, int correct);
 
 PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
 void insertPlayedRound(PlayedRound **head, int difficulty, int playerID , int points);
-void freeListWrongAnswers(wrongAnswer* head);
 void addQuestion(Question** questionHead);
 void playGame(Question* questionHead, Player**, PlayedRound**, wrongAnswer**);
 void freeQuestions(Question* questionHead);
 
 //Wrong Answers core function prototype definition
+void InsertWrongAnswer(wrongAnswer** head, int id, Question* questionHead, int wrong, int correct);
+void freeListWrongAnswers(wrongAnswer* head);
+void updateWrongCount(Question* questionHead, int questionId);
 int getWrongQuestionCount(wrongAnswer* wrongAnswerHead);
 void calculateErrorPercentage(Question* questionHead, int totalQuestions, 
                                 float *topErrorPercentages, int *topErrorQuestionIds);
