@@ -77,7 +77,8 @@ void freeQuestions(Question* questionHead);
 
 //Wrong Answers core function prototype definition
 int getWrongQuestionCount(wrongAnswer* wrongAnswerHead);
-void calculateErrorPercentage(Question* questionHead, int totalQuestions, float *topErrorPercentages);
+void calculateErrorPercentage(Question* questionHead, int totalQuestions, 
+                                float *topErrorPercentages, int *topErrorQuestionIds);
 
 //Player core function prototype definition
 Player* findPlayerByNickname(Player*,char*);
@@ -161,8 +162,11 @@ int main(){
                 printf(" Top 5 Hardest Questions \n");
                 printf("============================\n");
                 float topErrorPercentages[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
+                int topErrorQuestionIds[5] = {-1, -1, -1, -1, -1};
                 int totalWrongQuestions = getWrongQuestionCount(wrongAnswerHead);
-                calculateErrorPercentage(questionHead, totalWrongQuestions, topErrorPercentages);
+                calculateErrorPercentage(questionHead, totalWrongQuestions, 
+                                            topErrorPercentages, topErrorQuestionIds);
+                
 
                 break;
             case 10:
@@ -1078,22 +1082,24 @@ int getWrongQuestionCount(wrongAnswer* wrongAnswerHead){
     return totalQuestions;
 }
 
-void calculateErrorPercentage(Question* questionHead, int totalQuestions, float *topErrorPercentages){
+void calculateErrorPercentage(Question* questionHead, int totalQuestions, float *topErrorPercentages, int *topErrorQuestionIds){
     Question* tempQuestion = questionHead;
     float currentErrorPercentage;
+    int currentIdQuestion;
     while (tempQuestion) {
-        totalQuestions++;
         currentErrorPercentage = ((float)tempQuestion->wrongCount / (float)totalQuestions);
-
+        currentIdQuestion = tempQuestion->id;
         //check if this percentage belongs to top 5
         for(int i = 0; i < 5; i++){
             if(currentErrorPercentage > topErrorPercentages[i]) {
                 //shift lower percentages down
                 for(int j = 4; j > i; j--){
                     topErrorPercentages[j] = topErrorPercentages[j - 1];
+                    topErrorQuestionIds[j] = topErrorQuestionIds[j - 1];
                 }
                 //insert the new top percentage
                 topErrorPercentages[i] = currentErrorPercentage;
+                topErrorQuestionIds[i] = currentIdQuestion;
                 break;
             }
         }
