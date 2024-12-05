@@ -159,7 +159,8 @@ int main(){
                 printf("\n============================\n");
                 printf(" Top 5 Hardest Questions \n");
                 printf("============================\n");
-
+                float topErrorPercentages[5];
+                int totalQuestions = getQuestionsCount(questionHead);
                 break;
             case 10:
                 printf("\n============================\n");
