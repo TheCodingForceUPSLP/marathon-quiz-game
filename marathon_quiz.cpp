@@ -77,6 +77,7 @@ void freeQuestions(Question* questionHead);
 
 //Wrong Answers core function prototype definition
 int getWrongQuestionCount(wrongAnswer* wrongAnswerHead);
+void calculateErrorPercentage(Question* questionHead, int totalQuestions, float *topErrorPercentages);
 
 //Player core function prototype definition
 Player* findPlayerByNickname(Player*,char*);
@@ -159,7 +160,7 @@ int main(){
                 printf("\n============================\n");
                 printf(" Top 5 Hardest Questions \n");
                 printf("============================\n");
-                float topErrorPercentages[5];
+                float topErrorPercentages[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
                 int totalWrongQuestions = getWrongQuestionCount(wrongAnswerHead);
                 break;
             case 10:
@@ -1073,4 +1074,27 @@ int getWrongQuestionCount(wrongAnswer* wrongAnswerHead){
     }
 
     return totalQuestions;
+}
+
+void calculateErrorPercentage(Question* questionHead, int totalQuestions, float *topErrorPercentages){
+    Question* tempQuestion = questionHead;
+    float currentErrorPercentage;
+    while (tempQuestion) {
+        totalQuestions++;
+        currentErrorPercentage = ((float)tempQuestion->wrongCount / (float)totalQuestions);
+
+        //check if this percentage belongs to top 5
+        for(int i = 0; i < 5; i++){
+            if(currentErrorPercentage > topErrorPercentages[i]) {
+                //shift lower percentages down
+                for(int j = 4; j > i; j--){
+                    topErrorPercentages[j] = topErrorPercentages[j - 1];
+                }
+                //insert the new top percentage
+                topErrorPercentages[i] = currentErrorPercentage;
+                break;
+            }
+        }
+        tempQuestion = tempQuestion->next;
+    }
 }
