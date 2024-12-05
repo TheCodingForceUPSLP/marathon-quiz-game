@@ -30,13 +30,13 @@ typedef struct Player{
 }Player;
 
 typedef struct Question {
-    int id;
-    int category;
+	int id;
+	int category;
 	char question[MAX_STRING_QUESTION];
-    char options[3][MAX_STRING_QUESTION];
-    int correct_answer;
-    int wrongCount;
-    struct Question* next;
+	char options[3][MAX_STRING_QUESTION];
+	int correct_answer;
+	int wrongCount;
+	struct Question* next;
 } Question;
 
 typedef struct PlayedRound{
@@ -570,11 +570,13 @@ void displayQuestionsInPages(Question* questionHead) {
         // Show questions on current page
         while (temp != NULL && displayCount < questionsPerPage) {
             printf("Question ID: %d:\n", temp->id);
+            printf("Category: %s\n", categoryNames[temp->category - 1]);
             printf("Question: %s\n", temp->question);
             for (int i = 0; i < 3; i++) {
                 printf("Option %d: %s\n", i + 1, temp->options[i]);
             }
             printf("Correct Answer: Option %d: %s\n", temp->correct_answer, temp->options[temp->correct_answer - 1]);
+            printf("Wrong Answers count: %d\n", temp->wrongCount);
             printf("\n");
 
             temp = temp->next;
