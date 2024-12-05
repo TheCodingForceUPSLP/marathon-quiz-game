@@ -467,6 +467,12 @@ void displayQuestionsInPages(Question* questionHead) {
         temp = questionHead;
         int displayCount = 0;
 
+        // Traverse to the starting question for the current page
+        while (temp != NULL && index < start) {
+            temp = temp->next;
+            index++;
+        }
+        
         // Show questions on current page
         while (current != NULL && displayCount < questionsPerPage) {
             if (index >= start && index <= end) {
