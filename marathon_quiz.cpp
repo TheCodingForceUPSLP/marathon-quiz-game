@@ -30,13 +30,13 @@ typedef struct Player{
 }Player;
 
 typedef struct Question {
-    int id;
-    int category;
+	int id;
+	int category;
 	char question[MAX_STRING_QUESTION];
-    char options[3][MAX_STRING_QUESTION];
-    int correct_answer;
-    int wrongCount;
-    struct Question* next;
+	char options[3][MAX_STRING_QUESTION];
+	int correct_answer;
+	int wrongCount;
+	struct Question* next;
 } Question;
 
 typedef struct PlayedRound{
