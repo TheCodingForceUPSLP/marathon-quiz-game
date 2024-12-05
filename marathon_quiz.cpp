@@ -1117,7 +1117,7 @@ void displayTop5FailedQuestions(Question* questionHead, float *topErrorPercentag
                 if(tempQuestion->id == topErrorQuestionIds[i]){
                     printf("Question ID: %d\n", tempQuestion->id);
                     printf("Question: %s\n", tempQuestion->question);
-                    printf("Error Percentage: %.2f%%\n", topErrorPercentages[i]);
+                    printf("Error Percentage: %.2f%%\n", topErrorPercentages[i]*100);
                     printf("----------------------------\n");
                     break;
                 }
