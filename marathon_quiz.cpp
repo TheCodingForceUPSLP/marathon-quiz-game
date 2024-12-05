@@ -140,10 +140,10 @@ int main(){
                 deletePlayer(&playerHead);        
                 break;
             case 6: 
-		printf("\nEnter the id of the question to modify: ");
+		        printf("\nEnter the id of the question to modify: ");
             	scanf("%d",&questionId);
-		modifyQuestionById(questionHead, questionId, category);
-		saveQuestionsToFile(questionHead);
+		        modifyQuestionById(questionHead, questionId, category);
+		        saveQuestionsToFile(questionHead);
             	break;
             case 7:
             	printf("\nEnter the id of the question to delete: ");
