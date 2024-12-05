@@ -168,7 +168,7 @@ int main(){
                 calculateErrorPercentage(questionHead, totalWrongQuestions, 
                                             topErrorPercentages, topErrorQuestionIds);
                 
-
+                displayTop5FailedQuestions(questionHead,topErrorPercentages, topErrorQuestionIds);
                 break;
             case 10:
                 printf("\n============================\n");
