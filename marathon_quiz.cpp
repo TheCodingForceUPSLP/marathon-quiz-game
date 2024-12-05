@@ -75,6 +75,9 @@ void addQuestion(Question** questionHead);
 void playGame(Question* questionHead, Player**, PlayedRound**, wrongAnswer**);
 void freeQuestions(Question* questionHead);
 
+//Wrong Answers core function prototype definition
+int getQuestionsCount(Question* questionHead);
+
 //Player core function prototype definition
 Player* findPlayerByNickname(Player*,char*);
 Player* createPlayer(int,char*,float);
@@ -156,6 +159,7 @@ int main(){
                 printf("\n============================\n");
                 printf(" Top 5 Hardest Questions \n");
                 printf("============================\n");
+
                 break;
             case 10:
                 printf("\n============================\n");
@@ -1055,4 +1059,16 @@ void freeListWrongAnswers(wrongAnswer* head) {
         head = head->next;
         free(temp);  // Free the memory of the node
     }
+}
+
+int getQuestionsCount(Question* questionHead){
+    int totalQuestions = 0;
+    Question* tempQuestion = questionHead;
+
+    while (tempQuestion) {
+        totalQuestions++;
+        tempQuestion = tempQuestion->next;
+    }
+
+    return totalQuestions;
 }
