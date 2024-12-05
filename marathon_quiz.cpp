@@ -162,6 +162,8 @@ int main(){
                 printf("============================\n");
                 float topErrorPercentages[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
                 int totalWrongQuestions = getWrongQuestionCount(wrongAnswerHead);
+                calculateErrorPercentage(questionHead, totalWrongQuestions, topErrorPercentages);
+
                 break;
             case 10:
                 printf("\n============================\n");
