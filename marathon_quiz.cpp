@@ -208,7 +208,7 @@ void showMenu(int *choice){
     printf("8. Display questions by category\n");
     printf("9. Display Top 5 Failed Questions\n");
     printf("10. Show credits\n");
-    printf("111. Exit\n");
+    printf("11. Exit\n");
 
     printf("Select an option: ");
     scanf("%d", choice);
