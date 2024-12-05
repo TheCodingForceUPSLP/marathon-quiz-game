@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<math.h>
 
 //Const definition
 #define MAX_STRING_QUESTION 256
@@ -42,6 +43,7 @@ void insertPlayedRound(PlayedRound **head, int difficulty, int playerID , int po
 void loadPlayedRoundsFromFile(PlayedRound** playedRoundHead);
 void savePlayedRoundsToFile(PlayedRound* playedRoundHead);
 void freePlayedRounds(PlayedRound* playedRoundHead);
+void displayPlayedRounds(PlayedRound* playedRoundHead);
   
 void addQuestion(Question** questionHead);
 void playGame(Question* questionHead, Player**, PlayedRound**);
@@ -80,13 +82,16 @@ int main(){
                 savePlayedRoundsToFile(playedRoundHead); // Save after playing a game
                 break;
             case 3:
+            	displayPlayedRounds(playedRoundHead);
+            	break;
+            case 4:
                 printf("\n============================\n");
                 printf("    PROGRAM CREDITS\n");
                 printf("============================\n");
                 printf("Marathon Quiz Game\n");
                 printf("Developed by E13A Group\n\n");
                 break;
-            case 4:
+            case 5:
                 printf("Bye bye ...\n");
                 freeQuestions(questionHead);
                 freePlayers(playerHead);
@@ -109,8 +114,9 @@ void showMenu(int *choice){
     printf("============================\n");
     printf("1. Register new question\n");
     printf("2. Play game\n");
-    printf("3. Show credits\n");
-    printf("4. Exit\n");
+    printf("3. Show played rounds\n");
+    printf("4. Show credits\n");
+    printf("5. Exit\n");
 
     printf("Select an option: ");
     scanf("%d", choice);
@@ -372,6 +378,91 @@ void freePlayedRounds(PlayedRound* playedRoundHead){
         PlayedRound* temp = current;
         current = current->next;
         free(temp);
+    }
+}
+
+/*
+Display Played Rounds
+*/
+void displayPlayedRounds(PlayedRound* playedRoundHead) {
+    if (playedRoundHead == NULL) {
+        printf("\nNo rounds played yet.\n");
+        return;
+    }
+
+    int selectedMode;
+    do {
+        printf("\nSelect game mode to view:\n");
+        printf("1. Easy Mode\n2. Normal Mode\n3. God Mode\n");
+        printf("Enter your choice (1-3): ");
+        scanf("%d", &selectedMode);
+    } while (selectedMode < 1 || selectedMode > 3);
+
+    // Filter and count rounds for the selected mode
+    PlayedRound* current = playedRoundHead;
+    PlayedRound* filteredRounds[1000]; // Temporary array for filtered rounds
+    int count = 0;
+
+    while (current != NULL) {
+        if (current->difficulty == selectedMode) {
+            filteredRounds[count++] = current;
+        }
+        current = current->next;
+    }
+
+    if (count == 0) {
+        printf("\nNo rounds found for the selected mode.\n");
+        return;
+    }
+
+    // Sort the filtered rounds by score (descending)
+    for (int i = 0; i < count - 1; i++) {
+        for (int j = 0; j < count - i - 1; j++) {
+            if (filteredRounds[j]->points < filteredRounds[j + 1]->points) {
+                PlayedRound* temp = filteredRounds[j];
+                filteredRounds[j] = filteredRounds[j + 1];
+                filteredRounds[j + 1] = temp;
+            }
+        }
+    }
+
+    // Pagination system
+    int roundsPerPage = 5;
+    int totalPages = ceil((float)count / roundsPerPage);
+    int currentPage = 1;
+
+    while (1) {
+        system("cls");
+        printf("\n==============================\n");
+        printf("PLAYED ROUNDS - %s (PAGE %d of %d)\n",
+               selectedMode == 1 ? "Easy Mode" : selectedMode == 2 ? "Normal Mode" : "God Mode",
+               currentPage, totalPages);
+        printf("==============================\n");
+
+        int start = (currentPage - 1) * roundsPerPage;
+        int end = start + roundsPerPage;
+
+        for (int i = start; i < end && i < count; i++) {
+            printf("%d. Player ID: %d | Points: %d\n", i + 1, filteredRounds[i]->playerID, filteredRounds[i]->points);
+        }
+
+        printf("==============================\n");
+        printf("1. Previous Page\n2. Next Page\n3. Exit\n");
+        printf("Enter your choice: ");
+        
+        int option;
+        scanf("%d", &option);
+
+        if (option == 1 && currentPage > 1) {
+            currentPage--;
+        } else if (option == 2 && currentPage < totalPages) {
+            currentPage++;
+        } else if (option == 3) {
+            system("cls");
+            break;
+        } else {
+            printf("Invalid choice. Try again.\n");
+        }
     }
 }
 
