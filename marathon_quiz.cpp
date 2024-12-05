@@ -196,10 +196,18 @@ void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRo
     }else{
         id= getLastId(*playerHead,1000);
     }
-    //End.
     nicknameCreation(playerName);
     //End.
 
+    // Select difficulty
+    int difficulty;
+    printf("\n============================\n");
+    printf("   SELECT THE DIFFICULTY MODE:\n");
+    printf("1. Easy Mode (5 lives)\n");
+    printf("2. Normal Mode (3 lives)\n");
+    printf("3. God Mode (1 life)\n");
+    printf("============================\n");
+    
     printf("\nGame started! You have %d lives.\n", lives);
     
     while (current != NULL && lives > 0) {
