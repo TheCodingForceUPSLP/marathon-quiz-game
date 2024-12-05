@@ -208,6 +208,28 @@ void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRo
     printf("3. God Mode (1 life)\n");
     printf("============================\n");
     
+    do {
+        printf("Select an option: ");
+        scanf("%d", &difficulty);
+        getchar(); // Clear the newline character
+        if (difficulty < 1 || difficulty > 3) {
+            printf("Invalid option! Please select a number between 1 and 3.\n");
+        }
+    } while (difficulty < 1 || difficulty > 3);
+
+    // Assign lives based on the difficulty
+    switch (difficulty) {
+        case 1:
+            lives = 5;
+            break;
+        case 2:
+            lives = 3;
+            break;
+        case 3:
+            lives = 1;
+            break;
+    }
+    
     printf("\nGame started! You have %d lives.\n", lives);
     
     while (current != NULL && lives > 0) {
