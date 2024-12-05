@@ -76,7 +76,7 @@ void playGame(Question* questionHead, Player**, PlayedRound**, wrongAnswer**);
 void freeQuestions(Question* questionHead);
 
 //Wrong Answers core function prototype definition
-int getQuestionsCount(Question* questionHead);
+int getWrongQuestionCount(wrongAnswer* wrongAnswerHead);
 
 //Player core function prototype definition
 Player* findPlayerByNickname(Player*,char*);
@@ -106,7 +106,7 @@ void categoryMenu(int *category);
 void displayQuestionsByCategory(Question* head, int category);
 
 int main(){
-    wrongAnswer* WrongAnswers = NULL;
+    wrongAnswer* wrongAnswerHead = NULL;
     Question* questionHead = NULL;
     Player *playerHead=NULL;
     PlayedRound* playedRoundHead = NULL;
@@ -126,7 +126,7 @@ int main(){
                 saveQuestionsToFile(questionHead);
                 break;
             case 2:
-                playGame(questionHead,&playerHead, &playedRoundHead, &WrongAnswers);
+                playGame(questionHead,&playerHead, &playedRoundHead, &wrongAnswerHead);
                 savePlayersToFile(playerHead);
                 saveQuestionsToFile(questionHead);
                 break;
@@ -160,7 +160,7 @@ int main(){
                 printf(" Top 5 Hardest Questions \n");
                 printf("============================\n");
                 float topErrorPercentages[5];
-                int totalQuestions = getQuestionsCount(questionHead);
+                int totalWrongQuestions = getWrongQuestionCount(wrongAnswerHead);
                 break;
             case 10:
                 printf("\n============================\n");
@@ -173,7 +173,7 @@ int main(){
                 printf("Bye bye ...\n");
                 freeQuestions(questionHead);
                 freePlayers(playerHead);
-                freeListWrongAnswers(WrongAnswers);
+                freeListWrongAnswers(wrongAnswerHead);
                 return 0;
                 break;
             default:
@@ -1062,13 +1062,14 @@ void freeListWrongAnswers(wrongAnswer* head) {
     }
 }
 
-int getQuestionsCount(Question* questionHead){
-    int totalQuestions = 0;
-    Question* tempQuestion = questionHead;
 
-    while (tempQuestion) {
+int getWrongQuestionCount(wrongAnswer* wrongAnswerHead){
+    int totalQuestions = 0;
+    wrongAnswer* tempWrongQuestion = wrongAnswerHead;
+
+    while (tempWrongQuestion) {
         totalQuestions++;
-        tempQuestion = tempQuestion->next;
+        tempWrongQuestion = tempWrongQuestion->next;
     }
 
     return totalQuestions;
