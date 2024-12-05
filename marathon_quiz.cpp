@@ -430,24 +430,30 @@ void displayQuestionsInPages(Question* questionHead) {
         printf("No questions to display.\n");
         return;
     }
-    
+
     int currentPage = 1;
     int questionsPerPage = 5;
     Question* current = questionHead;
     
-    while (current != NULL) {
+    while (1) {
         int totalQuestions = 0;
         Question* temp = current;
+
+        // Calculate total number of questions
         while (temp != NULL) {
             totalQuestions++;
             temp = temp->next;
         }
 
+        // Calculate total pages
         int totalPages = ceil((float)totalQuestions / questionsPerPage);
+
+
         if (currentPage > totalPages) {
             currentPage = totalPages;
         }
 
+        // Display questions for the current page
         system("cls");
         printf("===============================\n");
         printf("QUESTION LIST (PAGE %d of %d)\n", currentPage, totalPages);
@@ -457,8 +463,11 @@ void displayQuestionsInPages(Question* questionHead) {
         int end = start + questionsPerPage - 1;
         int index = 1;
 
-        /*Show questions on current page*/
+        
+        temp = questionHead;
         int displayCount = 0;
+
+        // Show questions on current page
         while (current != NULL && displayCount < questionsPerPage) {
             if (index >= start && index <= end) {
                 printf("Question %d:\n", current->id);
