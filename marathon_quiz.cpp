@@ -116,7 +116,7 @@ void displayQuestionsInPages(Question* questionHead);
 void printPlayers(Player *playerHead);
 //Category functions
 void categoryMenu(int *category);
-void displayQuestionsByCategory(Question* head, int category);
+void displayQuestionsByCategory(Question* questionHead, int category);
 
 int main(){
     WrongAnswer* wrongAnswerHead = NULL;
@@ -511,8 +511,8 @@ void displayQuestion(Question* q, int* questionNumber) {
 /*
 Display question by specific category
 */
-void displayQuestionsByCategory(Question* head, int category){
-	Question * current= head;
+void displayQuestionsByCategory(Question* questionHead, int category){
+	Question * current= questionHead;
 	int found=0;
 	while (current != NULL){
 		if(current->category==category){
