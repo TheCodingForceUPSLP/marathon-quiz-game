@@ -42,7 +42,7 @@ typedef struct Question {
 typedef struct PlayedRound{
 	int difficulty; 
 	int playerID;
-	int points;
+	int correctAnswers;
 	struct PlayedRound* next;
 }PlayedRound;
 
@@ -66,8 +66,13 @@ void loadQuestionsFromFile(Question** questionHead);
 void saveQuestionsToFile(Question* questionHead);
 void showMenu(int *choice);
 
-PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
-void insertPlayedRound(PlayedRound **head, int difficulty, int playerID , int points);
+PlayedRound* createPlayedRound(int difficulty, int playerID , int correctAnswers);
+void insertPlayedRound(PlayedRound **head, int difficulty, int playerID , int correctAnswers);
+void loadPlayedRoundsFromFile(PlayedRound** playedRoundHead);
+void savePlayedRoundsToFile(PlayedRound* playedRoundHead);
+void freePlayedRounds(PlayedRound* playedRoundHead);
+void displayPlayedRounds(PlayedRound* playedRoundHead);
+  
 void addQuestion(Question** questionHead);
 void playGame(Question* questionHead, Player**, PlayedRound**, WrongAnswer**);
 void freeQuestions(Question* questionHead);
@@ -118,7 +123,7 @@ int main(){
     Question* questionHead = NULL;
     Player *playerHead=NULL;
     PlayedRound* playedRoundHead = NULL;
-    
+
     int choice;
     int questionId = 0;
     int category= 0;
@@ -127,6 +132,7 @@ int main(){
     float topErrorPercentages[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
     int topErrorQuestionIds[5] = {-1, -1, -1, -1, -1};
 
+    loadPlayedRoundsFromFile(&playedRoundHead);
     loadPlayersFromFile(&playerHead);
     loadQuestionsFromFile(&questionHead);
     loadWrongAnswersFromFile(&wrongAnswerHead);
@@ -140,62 +146,64 @@ int main(){
                 break;
             case 2:
                 playGame(questionHead,&playerHead, &playedRoundHead, &wrongAnswerHead);
+                savePlayedRoundsToFile(playedRoundHead); // Save after playing a game
                 savePlayersToFile(playerHead);
                 saveQuestionsToFile(questionHead);
                 saveWrongAnswersToFile(wrongAnswerHead);
                 break;
             case 3:
             	printPlayers(playerHead);
-            	break;	
+            	break;
             case 4:
-                changeName(playerHead);
+                displayPlayedRounds(playedRoundHead);
                 break;
             case 5:
-                deletePlayer(&playerHead);        
+                changeName(playerHead);
                 break;
-            case 6: 
+            case 6:
+                deletePlayer(&playerHead);
+                break;
+            case 7:
 		        printf("\nEnter the id of the question to modify: ");
             	scanf("%d",&questionId);
 		        modifyQuestionById(questionHead, questionId, category);
 		        saveQuestionsToFile(questionHead);
             	break;
-        
-            case 7:
+            case 8:
             	printf("\nEnter the id of the question to delete: ");
             	scanf("%d",&questionId);
             	deleteQuestionById(&questionHead, questionId);
             	saveQuestionsToFile(questionHead);
             	break;
-            case 8:
+            case 9:
             	categoryMenu(&category);
             	displayQuestionsByCategory(questionHead, category);
             	break;
-            case 9:
-            	displayQuestionsInPages(questionHead);  
-				break;          	
             case 10:
+            	displayQuestionsInPages(questionHead);
+				break;
+            case 11:
                 printf("\n============================\n");
                 printf(" Top 5 Hardest Questions \n");
                 printf("============================\n");
                 totalWrongQuestions = getWrongQuestionCount(wrongAnswerHead);
-                calculateErrorPercentage(questionHead, totalWrongQuestions, 
-                                            topErrorPercentages, topErrorQuestionIds); 
+                calculateErrorPercentage(questionHead, totalWrongQuestions, topErrorPercentages, topErrorQuestionIds);
                 displayTop5FailedQuestions(questionHead,topErrorPercentages, topErrorQuestionIds);
                 break;
-            case 11:
+            case 12:
                 printf("\n============================\n");
                 printf("    PROGRAM CREDITS\n");
                 printf("============================\n");
                 printf("Marathon Quiz Game\n");
                 printf("Developed by E13A Group\n\n");
                 break;
-            case 12:
+            case 13:
                 printf("Bye bye ...\n");
                 freeQuestions(questionHead);
                 freePlayers(playerHead);
+                freePlayedRounds(playedRoundHead);
                 freeListWrongAnswers(wrongAnswerHead);
                 return 0;
-                break;
             default:
                 printf("Invalid choice!\n");
                 break;
@@ -212,16 +220,17 @@ void showMenu(int *choice){
     printf("============================\n");
     printf("1. Register new question\n");
     printf("2. Play game\n");
-    printf("3. Display ranking players\n");   
-    printf("4. Rename player\n");
-    printf("5. Delete player\n");
-    printf("6. Modify question by Id\n");
-    printf("7. Delete question\n");
-    printf("8. Display questions by category\n");
-    printf("9. Display questions by page\n");
-    printf("10. Display Top 5 Failed Questions\n");
-    printf("11. Show credits\n");
-    printf("12. Exit\n");
+    printf("3. Display ranking players\n");
+    printf("4. Show played rounds\n");
+    printf("5. Rename player\n");
+    printf("6. Delete player\n");
+    printf("7. Modify question by Id\n");
+    printf("8. Delete question\n");
+    printf("9. Display questions by category\n");
+    printf("10. Display questions by page\n");
+    printf("11. Display Top 5 Failed Questions\n");
+    printf("12. Show credits\n");
+    printf("13. Exit\n");
 
     printf("Select an option: ");
     scanf("%d", choice);
@@ -237,12 +246,12 @@ void categoryMenu(int *category){
     printf("4. Sports, Movies, Books, Art\n");
     printf("5. Science and Biology\n");
     printf("6. Spanish, Philosophy and Religion\n");
-    
+
     do{
         printf("Select a category (1-6): ");
-        scanf("%d", category); 
+        scanf("%d", category);
 		while(getchar() != '\n');
-    }while(*category < 1 || *category > 6); 
+    }while(*category < 1 || *category > 6);
 }
 /*
 Create a question in memory.
@@ -273,7 +282,7 @@ Question* createQuestion(int questionId) {
     int category;
     categoryMenu(&category);
     newQuestion->category=category;
-    
+
     newQuestion->wrongCount=0;
     newQuestion->id = questionId;
     newQuestion->next = NULL;
@@ -308,15 +317,15 @@ void deleteQuestionById(Question **questionHead, int questionId) {
 
     // Searches for the node with the specified ID
     current = searchQuestion(*questionHead, questionId);
-    
+
     // If the ID is not found, terminate
     if (current == NULL){
     	printf("\nThe question with the entered id was not found\n");
     	return;
 	}
-    
+
     current = *questionHead;
-    
+
     while (current->id != questionId) {
         previous = current;
         current = current->next;
@@ -331,7 +340,7 @@ void deleteQuestionById(Question **questionHead, int questionId) {
 
     // Frees the memory of the deleted node
     free(current);
-    
+
     printf("\nThe question was correctly deleted");
 }
 
@@ -354,13 +363,13 @@ void modifyQuestionById(Question* questionHead, int id, int category) {
     printf("Enter new question: ");
     getchar();
     fgets(current->question, MAX_STRING_QUESTION, stdin);
-    current->question[strcspn(current->question, "\n")] = 0; 
+    current->question[strcspn(current->question, "\n")] = 0;
 
     // Refresh options
     for (int i = 0; i < 3; i++) {
         printf("Enter option %d: ", i + 1);
         fgets(current->options[i], MAX_STRING_QUESTION, stdin);
-        current->options[i][strcspn(current->options[i], "\n")] = 0; 
+        current->options[i][strcspn(current->options[i], "\n")] = 0;
     }
 
     // check correct answer
@@ -430,7 +439,7 @@ void saveQuestionsToFile(Question* questionHead) {
                 current->correct_answer,
                 current->category,
 				current->wrongCount);
-                
+
         current = current->next;
     }
     fclose(file);
@@ -528,7 +537,7 @@ void displayQuestionsInPages(Question* questionHead) {
     int currentPage = 1;
     int questionsPerPage = 5;
     Question* current = questionHead;
-    
+
     while (1) {
         int totalQuestions = 0;
         Question* temp = current;
@@ -557,7 +566,7 @@ void displayQuestionsInPages(Question* questionHead) {
         int end = start + questionsPerPage - 1;
         int index = 1;
 
-        
+
         temp = questionHead;
         int displayCount = 0;
 
@@ -582,7 +591,7 @@ void displayQuestionsInPages(Question* questionHead) {
             temp = temp->next;
             displayCount++;
         }
-		
+
 		// Options menu for page or exit
         printf("===============================\n");
         printf("1. Previous Page\n");
@@ -616,7 +625,7 @@ void displayQuestionsInPages(Question* questionHead) {
 Logic for marathon game
 */
 void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRound, WrongAnswer** wrongAnswerHead) {
-    int lives = 3;
+    int lives;
     int score = 0;
     int questionNumber = 1;
     Question* current = questionHead;
@@ -634,10 +643,40 @@ void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRo
     }else{
         id= getLastId(*playerHead,1000);
     }
-    //End.
     nicknameCreation(playerName);
     //End.
-    
+
+    // Select difficulty
+    int difficulty;
+    printf("\n============================\n");
+    printf("   SELECT THE DIFFICULTY MODE:\n");
+    printf("1. Easy Mode (5 lives)\n");
+    printf("2. Normal Mode (3 lives)\n");
+    printf("3. God Mode (1 life)\n");
+    printf("============================\n");
+
+    do {
+        printf("Select an option: ");
+        scanf("%d", &difficulty);
+        getchar(); // Clear the newline character
+        if (difficulty < 1 || difficulty > 3) {
+            printf("Invalid option! Please select a number between 1 and 3.\n");
+        }
+    } while (difficulty < 1 || difficulty > 3);
+
+    // Assign lives based on the difficulty
+    switch (difficulty) {
+        case 1:
+            lives = 5;
+            break;
+        case 2:
+            lives = 3;
+            break;
+        case 3:
+            lives = 1;
+            break;
+    }
+
     printf("\nGame started! You have %d lives.\n", lives);
     
     while (current != NULL && lives > 0) {
@@ -662,7 +701,7 @@ void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRo
         questionNumber++;
 
         //Mode multipliers for final score (1 - Easy, 2 - Normal, 3 - God)
-        totalScore= newScore(score,1);
+        totalScore = newScore(score,difficulty);
         
         if (lives == 0) {
             //Player insertion into the list
@@ -685,20 +724,23 @@ void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRo
             updatePlayerIfHigherScore(playerHead,playerName,totalScore);
             //End.
             printf("\nCongratulations! You completed all questions!\n");
-            
+
             // Function to display the bottom 5 scores
             displayBottom5Scores(*playerHead, newPlayer);
         }
 
     }
-    
-    printf("Final score: %d\n", score);
+
+    printf("Total score: %.2f\n", totalScore);
+    printf("Correct answers: %d\n", score);
+
     /*
     NOTE:
     The difficulty and userID are hardcoded 
     please modify the call
     */
-    insertPlayedRound(playerRound, 1, 1, score);
+
+    insertPlayedRound(playerRound, difficulty , newPlayer->id, score);
 }
 
 /*
@@ -716,7 +758,7 @@ void freeQuestions(struct Question* questionHead) {
 /*
 Create the player round.
 */
-PlayedRound* createPlayedRound(int difficulty, int playerID, int points){
+PlayedRound* createPlayedRound(int difficulty, int playerID, int correctAnswers){
     PlayedRound *newRound = (PlayedRound*)malloc(sizeof(PlayedRound));
 	if (newRound == NULL) {
         printf("ERROR\n");
@@ -724,27 +766,27 @@ PlayedRound* createPlayedRound(int difficulty, int playerID, int points){
     }
 	newRound->difficulty = difficulty;
 	newRound->playerID = playerID; 
-	newRound->points = points;
+	newRound->correctAnswers = correctAnswers;
 	newRound->next = NULL; 
 	
 	return newRound;
 }
 
 /*
-Insert player round sorted by difficulty (1,2,3) and the points (ascending order).
+Insert player round sorted by difficulty (1,2,3) and the correctAnswers (ascending order).
 */
-void insertPlayedRound(PlayedRound **head, int difficulty, int playerID, int points){
-	PlayedRound *newRound = createPlayedRound(difficulty, playerID, points);  
+void insertPlayedRound(PlayedRound **head, int difficulty, int playerID, int correctAnswers){
+	PlayedRound *newRound = createPlayedRound(difficulty, playerID, correctAnswers);
 	//Go through the list and find the position to insert the node
 	if(*head ==NULL || (*head)->difficulty > newRound->difficulty 
-	    							&& (*head)->points < newRound->points){
+	    							&& (*head)->correctAnswers < newRound->correctAnswers){
 		newRound->next = *head;
 		*head = newRound;
 		return; 
 	}
 	PlayedRound *current = *head;
 	while(current->next !=NULL && current->next->difficulty < newRound->difficulty 
-									&& current->next->points >= newRound->points){
+									&& current->next->correctAnswers >= newRound->correctAnswers){
 		current = current->next;
 	}
 	newRound->next = current->next;
@@ -752,6 +794,131 @@ void insertPlayedRound(PlayedRound **head, int difficulty, int playerID, int poi
 	
 }
 
+//Load the records for played rounds
+void loadPlayedRoundsFromFile(PlayedRound** playedRoundHead) {
+    FILE* file = fopen("playedRounds.txt", "r");
+    if (file == NULL) {
+        printf("Warning: File not found or could not be opened.\n");
+        return;
+    }
+    int difficulty, playerID, correctAnswers;
+    while (fscanf(file, "%d|%d|%d\n", &difficulty, &playerID, &correctAnswers) == 3) {
+        insertPlayedRound(playedRoundHead, difficulty, playerID, correctAnswers);
+    }
+    fclose(file);
+    printf("Played rounds have been loaded successfully.\n");
+}
+
+//Save the records for played rounds
+void savePlayedRoundsToFile(PlayedRound* playedRoundHead){
+    FILE* file = fopen("playedRounds.txt", "w");
+    if (file == NULL) {
+        printf("Error: Could not open file for saving played rounds.\n");
+        return;
+    }
+    PlayedRound* current = playedRoundHead;
+    while (current != NULL) {
+        fprintf(file, "%d|%d|%d\n", current->difficulty, current->playerID, current->correctAnswers);
+        current = current->next;
+    }
+    fclose(file);
+    printf("Played rounds have been saved successfully.\n");
+}
+
+//Empty all the players rounds
+void freePlayedRounds(PlayedRound* playedRoundHead){
+    PlayedRound* current = playedRoundHead;
+    while (current != NULL) {
+        PlayedRound* temp = current;
+        current = current->next;
+        free(temp);
+    }
+}
+
+/*
+Display Played Rounds
+*/
+void displayPlayedRounds(PlayedRound* playedRoundHead) {
+    if (playedRoundHead == NULL) {
+        printf("\nNo rounds played yet.\n");
+        return;
+    }
+
+    int selectedMode;
+    do {
+        printf("\nSelect game mode to view:\n");
+        printf("1. Easy Mode\n2. Normal Mode\n3. God Mode\n");
+        printf("Enter your choice (1-3): ");
+        scanf("%d", &selectedMode);
+    } while (selectedMode < 1 || selectedMode > 3);
+
+    // Filter and count rounds for the selected mode
+    PlayedRound* current = playedRoundHead;
+    PlayedRound* filteredRounds[1000]; // Temporary array for filtered rounds
+    int count = 0;
+
+    while (current != NULL) {
+        if (current->difficulty == selectedMode) {
+            filteredRounds[count++] = current;
+        }
+        current = current->next;
+    }
+
+    if (count == 0) {
+        printf("\nNo rounds found for the selected mode.\n");
+        return;
+    }
+
+    // Sort the filtered rounds by score (descending)
+    for (int i = 0; i < count - 1; i++) {
+        for (int j = 0; j < count - i - 1; j++) {
+            if (filteredRounds[j]->correctAnswers < filteredRounds[j + 1]->correctAnswers) {
+                PlayedRound* temp = filteredRounds[j];
+                filteredRounds[j] = filteredRounds[j + 1];
+                filteredRounds[j + 1] = temp;
+            }
+        }
+    }
+
+    // Pagination system
+    int roundsPerPage = 5;
+    int totalPages = ceil((float)count / roundsPerPage);
+    int currentPage = 1;
+
+    while (1) {
+        system("cls");
+        printf("\n==============================\n");
+        printf("PLAYED ROUNDS - %s (PAGE %d of %d)\n",
+               selectedMode == 1 ? "Easy Mode" : selectedMode == 2 ? "Normal Mode" : "God Mode",
+               currentPage, totalPages);
+        printf("==============================\n");
+
+        int start = (currentPage - 1) * roundsPerPage;
+        int end = start + roundsPerPage;
+
+        for (int i = start; i < end && i < count; i++) {
+            printf("%d. Player ID: %d | correctAnswers: %d\n", i + 1, filteredRounds[i]->playerID, filteredRounds[i]->correctAnswers);
+        }
+
+        printf("==============================\n");
+        printf("1. Previous Page\n2. Next Page\n3. Exit\n");
+        printf("Enter your choice: ");
+
+        int option;
+        scanf("%d", &option);
+
+        if (option == 1 && currentPage > 1) {
+            currentPage--;
+        } else if (option == 2 && currentPage < totalPages) {
+            currentPage++;
+        } else if (option == 3) {
+            system("cls");
+            break;
+        } else {
+            printf("Invalid choice. Try again.\n");
+        }
+    }
+}
 
 //Empty all the players of the list
 void freePlayers(struct Player* playerHead) {
@@ -931,7 +1098,7 @@ void deletePlayer(Player** head){
 
     while (current != NULL) {
         if (current->id == playerId) {
-            
+
             if (current == *head) {
                 *head = current->next;
                 if (*head != NULL) {
@@ -945,7 +1112,7 @@ void deletePlayer(Player** head){
                     current->next->prev = current->prev;
                 }
             }
-            
+
             free(current);
             printf("The player %i was successfully deleted. RIP.\n", playerId);
             return;
@@ -967,7 +1134,7 @@ void changeName(Player* head) {
     }
 
     Player* current = head;
-	//catchs the id 
+	//catchs the id
     printf("Gimme the id of the one who wants a fresh new name\n ");
     scanf("%d", &playerId);
 
@@ -1014,48 +1181,48 @@ void printPlayers(Player *head){
 
     while(1){
         system("cls");
-        
+
 	    printf("===============================\n");
 	    printf("PLAYER RANKINGS (PAGE %d of %d)\n",currentPage,totalPages);
 	    printf("===============================\n");
-		
+
 		/*start is showing us the first player in each page
-		 for exmaple: page 1: start with the number 1 
+		 for exmaple: page 1: start with the number 1
 		 and the page 2: start with the number 6*/
 	    int start = (currentPage - 1) * playersPerPage + 1;
-	    
+
 		/*end indicates the last player for each page for example
 	    page 1: end with the number 5
 	    page 2: end with the number 11
 	    */
 	    int end = start + playersPerPage - 1;
-	
+
 	    // Move to an initial position from the page
 	    current = head;
-	    
+
 	    int index = 1;
 	    while (current != NULL && index < start) {
 	        current = current->next;
 	        index++;
 	    }
-	
+
 	    index=start;
-		//Shows us the information of each player and its limit is the "end" that was calculated before 
+		//Shows us the information of each player and its limit is the "end" that was calculated before
 	    while (current != NULL && index <= end) {
 	        printf("%d. [ID: %03d] %s - %.1f pts\n", index, current->id, current->nickname, current->maxScore);
 	        current = current->next;
 	        index++;
 	    }
-	    
+
 	    printf("===============================\n");
 	    printf("1. Previous Page\n");
 	    printf("2. Next Page\n");
 	    printf("3. Exit to Menu\n");
 	    printf("Option: ");
-	
+
 	    int option=0;
 	    scanf("%d", &option);
-	
+
 	    if (option == 1 && currentPage > 1) {
 	        currentPage--;
 	    } else if (option == 2 && currentPage < totalPages) {
@@ -1326,18 +1493,18 @@ void loadWrongAnswersFromFile(WrongAnswer** wrongAnswerHead) {
 void displayBottom5Scores(Player* playerHead, Player* currentPlayer) {
     Player* temp = playerHead;
     int playerCount = 0;
- 
+
     // Count the number of players
     while (temp != NULL) {
         playerCount++;
         temp = temp->next;
     }
- 
+
     // If there are 5 or fewer players, display all scores
     if (playerCount <= 5) {
         printf("\n==============================\n");
         printf("Keep practicing! \nHere are some scores to beat:\n\n");
- 
+
         printf("Bottom Scores:\n");
         temp = playerHead;
         for (int i = 0; i < playerCount; i++) {
@@ -1352,7 +1519,7 @@ void displayBottom5Scores(Player* playerHead, Player* currentPlayer) {
         printf("==============================\n");
         return;
     }
- 
+
     // If there are more than 5 players, collect players into an array
     Player* players[10000];  // Temporarily, for the dynamic list
     temp = playerHead;
@@ -1381,18 +1548,18 @@ void displayBottom5Scores(Player* playerHead, Player* currentPlayer) {
             break;
         }
     }
- 
+
     // If the current player is not in the bottom 5, do nothing
     if (!isInBottom5) {
         return;
     }
- 
+
     // Display the bottom 5 scores
     printf("\n==============================\n");
     printf("Keep practicing! \nHere are some scores to beat:\n\n");
- 
+
     printf("Bottom 5 Scores:\n");
- 
+
     // Show the bottom 5 scores, highlighting the current player as "YOU"
     for (int i = 0; i < 5; i++) {
         if (players[i] == currentPlayer) {
@@ -1401,7 +1568,7 @@ void displayBottom5Scores(Player* playerHead, Player* currentPlayer) {
             printf("%d. %s - %.0f pts\n", 5 - i, players[i]->nickname, players[i]->maxScore);
         }
     }
- 
+
     // Motivational message
     printf("\nDon't give up! Try again!\n");
     printf("==============================\n");
