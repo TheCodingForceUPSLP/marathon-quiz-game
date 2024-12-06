@@ -56,67 +56,59 @@ typedef struct WrongAnswer {
     struct WrongAnswer* prev;     // Points to the previous node
 } WrongAnswer;
 
-// Function prototypes
-Question* createQuestion(int questionId);
-Question* searchQuestion(Question *questionHead, int questionId);
-int getLastQuestionId(Question* questionHead, int idStart);
-void deleteQuestionById(Question **questionHead, int questionId);
-void modifyQuestionById(Question* questionHead, int id, int category);
-void loadQuestionsFromFile(Question** questionHead);
-void saveQuestionsToFile(Question* questionHead);
-void showMenu(int *choice);
+// Prototypes
+void showMenu(int*);
+void playGame(Question*, Player**, PlayedRound**, WrongAnswer**);
 
-PlayedRound* createPlayedRound(int difficulty, int playerID , int correctAnswers);
-void insertPlayedRound(PlayedRound **head, int difficulty, int playerID , int correctAnswers);
-void loadPlayedRoundsFromFile(PlayedRound** playedRoundHead);
-void savePlayedRoundsToFile(PlayedRound* playedRoundHead);
-void freePlayedRounds(PlayedRound* playedRoundHead);
-void displayPlayedRounds(PlayedRound* playedRoundHead);
-  
-void addQuestion(Question** questionHead);
-void playGame(Question* questionHead, Player**, PlayedRound**, WrongAnswer**);
-void freeQuestions(Question* questionHead);
-
-//Wrong Answers core function prototype definition
-void InsertWrongAnswer(WrongAnswer** wrongAnswerHead, int id, Question* questionHead, int wrong, int correct);
-void freeListWrongAnswers(WrongAnswer* wrongAnswerHead);
-void updateWrongCount(Question* questionHead, int questionId);
-int getWrongQuestionCount(WrongAnswer* wrongAnswerHead);
-void calculateErrorPercentage(Question* questionHead, int totalQuestions, float *topErrorPercentages, int *topErrorQuestionIds);
-void displayTop5FailedQuestions(Question* questionHead, float *topErrorPercentages, int *topErrorQuestionIds);
-void displayBottom5Scores(Player* playerHead, Player* currentPlayer);
-void saveWrongAnswersToFile(WrongAnswer* wrongAnswerHead);
-void loadWrongAnswersFromFile(WrongAnswer** wrongAnswerHead);
-
-//Player core function prototype definition
-Player* findPlayerByNickname(Player*,char*);
-Player* createPlayer(int,char*,float);
-void insertSortedPlayer(Player**,Player*);
-void updatePlayerIfHigherScore(Player**,char*,float);
-void freePlayers(Player*);
-void deletePlayer(Player** playerHead);
-void changeName(Player* playerHead);
-bool isNicknameInList(Player*,char*);
-int getLastId(Player*,int);
-
-//Functions to handle players file
-void savePlayersToFile(Player* playerHead);
-void loadPlayersFromFile(Player** playerHead);
-
-//Scoring system function prototype definition
-float newScore(int,int);
-
-//Nickname creation function prototype definition
-void nicknameCreation(char*);
-
-//Funciton for display quetions page
-void displayQuestionsInPages(Question* questionHead);
-
-//Function for display the rankings
-void printPlayers(Player *playerHead);
+// Questions core function prototype definition
+Question* createQuestion(int);
+Question* searchQuestion(Question*, int);
+int getLastQuestionId(Question*, int);
+void addQuestion(Question**);
+void deleteQuestionById(Question**, int);
+void modifyQuestionById(Question*, int, int);
+void loadQuestionsFromFile(Question**);
+void saveQuestionsToFile(Question*);
+void displayQuestionsInPages(Question*);
+void freeQuestions(Question*);
 //Category functions
 void categoryMenu(int *category);
-void displayQuestionsByCategory(Question* questionHead, int category);
+void displayQuestionsByCategory(Question* head, int category);
+
+//PlayedRound core function prototype definition
+PlayedRound* createPlayedRound(int, int, int);
+void insertPlayedRound(PlayedRound**, int, int , int);
+void loadPlayedRoundsFromFile(PlayedRound**);
+void savePlayedRoundsToFile(PlayedRound*);
+void freePlayedRounds(PlayedRound*);
+void displayPlayedRounds(PlayedRound*);
+
+//Wrong Answers core function prototype definition
+int getWrongQuestionCount(WrongAnswer*);
+void InsertWrongAnswer(WrongAnswer**, int, Question*, int, int);
+void freeListWrongAnswers(WrongAnswer*);
+void updateWrongCount(Question*, int);
+void calculateErrorPercentage(Question*, int, float*, int*);
+void displayTop5FailedQuestions(Question*, float*, int*);
+void displayBottom5Scores(Player*, Player*);
+void saveWrongAnswersToFile(WrongAnswer*);
+void loadWrongAnswersFromFile(WrongAnswer**);
+
+//Player core function prototype definition
+Player* findPlayerByNickname(Player*, char*);
+Player* createPlayer(int, char*, float);
+float newScore(int, int); //Scoring system function prototype definition
+int getLastId(Player*, int);
+bool isNicknameInList(Player*, char*);
+void insertSortedPlayer(Player**, Player*);
+void updatePlayerIfHigherScore(Player**, char*, float);
+void freePlayers(Player*);
+void deletePlayer(Player**);
+void changeName(Player*);
+void savePlayersToFile(Player*);
+void loadPlayersFromFile(Player**);
+void nicknameCreation(char*); //Nickname creation function prototype definition
+void printPlayers(Player*); //Function for display the rankings
 
 int main(){
     WrongAnswer* wrongAnswerHead = NULL;
