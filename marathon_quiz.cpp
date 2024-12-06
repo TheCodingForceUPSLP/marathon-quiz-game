@@ -503,8 +503,8 @@ void displayQuestion(Question* q, int* questionNumber) {
 /*
 Display question by specific category
 */
-void displayQuestionsByCategory(Question* head, int category){
-	Question * current= head;
+void displayQuestionsByCategory(Question* questionHead, int category){
+	Question * current= questionHead;
 	int found=0;
 	while (current != NULL){
 		if(current->category==category){
@@ -1074,15 +1074,15 @@ void updatePlayerIfHigherScore(Player **playerHead, char *nickname, float newSco
     return;
 }
 
-void deletePlayer(Player** head){
+void deletePlayer(Player** playerHead){
     int playerId;
 
-    if (*head == NULL) {
+    if (*playerHead == NULL) {
         printf("There's no player to delete\n");
         return;
     }
 
-    Player* current = *head;
+    Player* current = *playerHead;
 
     // Prompt user for the ID of the player to delete
     printf("What's the id of the poor soul you want to delete?\n");
@@ -1091,10 +1091,10 @@ void deletePlayer(Player** head){
     while (current != NULL) {
         if (current->id == playerId) {
 
-            if (current == *head) {
-                *head = current->next;
-                if (*head != NULL) {
-                    (*head)->prev = NULL;
+            if (current == *playerHead) {
+                *playerHead = current->next;
+                if (*playerHead != NULL) {
+                    (*playerHead)->prev = NULL;
                 }
             } else {
                 if (current->prev != NULL) {
@@ -1116,16 +1116,16 @@ void deletePlayer(Player** head){
     printf("No player with ID %i found.\n", playerId);
 }
 
-void changeName(Player* head) {
+void changeName(Player* playerHead) {
     int playerId;
     char nickname[MAX_STRING_NICKNAME];
    //checks if theres already players
-    if (head == NULL) {
+    if (playerHead == NULL) {
         printf("There's no player to rename\n");
         return;
     }
 
-    Player* current = head;
+    Player* current = playerHead;
 	//catchs the id
     printf("Gimme the id of the one who wants a fresh new name\n ");
     scanf("%d", &playerId);
@@ -1149,14 +1149,14 @@ void changeName(Player* head) {
 }
 
 //function for rankings
-void printPlayers(Player *head){
+void printPlayers(Player *playerHead){
 	//if the game doesnt have players then, this if action
-    if(head==NULL){
+    if(playerHead==NULL){
         printf("there are not players.\n");
         return;
     }
 	//use current like auxiliar
-    Player* current = head;
+    Player* current = playerHead;
     //int type for count all the player in the list
     int TotalPlayers=0;
 	//scroll through the list and count each player
@@ -1190,7 +1190,7 @@ void printPlayers(Player *head){
 	    int end = start + playersPerPage - 1;
 
 	    // Move to an initial position from the page
-	    current = head;
+	    current = playerHead;
 
 	    int index = 1;
 	    while (current != NULL && index < start) {
