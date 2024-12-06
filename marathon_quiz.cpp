@@ -30,7 +30,7 @@ typedef struct Question {
 typedef struct PlayedRound{
 	int difficulty; 
 	int playerID;
-	int points;
+	int correctAnswers;
 	struct PlayedRound* next;
 }PlayedRound;
 
@@ -38,8 +38,8 @@ typedef struct PlayedRound{
 Question* createQuestion();
 void showMenu(int *choice);
 
-PlayedRound* createPlayedRound(int difficulty, int playerID , int points);
-void insertPlayedRound(PlayedRound **head, int difficulty, int playerID , int points);
+PlayedRound* createPlayedRound(int difficulty, int playerID , int correctAnswers);
+void insertPlayedRound(PlayedRound **head, int difficulty, int playerID , int correctAnswers);
 void loadPlayedRoundsFromFile(PlayedRound** playedRoundHead);
 void savePlayedRoundsToFile(PlayedRound* playedRoundHead);
 void freePlayedRounds(PlayedRound* playedRoundHead);
@@ -257,7 +257,7 @@ void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRo
         questionNumber++;
 
         //Mode multipliers for final score (1 - Easy, 2 - Normal, 3 - God)
-        totalScore= newScore(score,1);
+        totalScore = newScore(score,difficulty);
         
         if (lives == 0) {
             //Player insertion into the list
@@ -279,14 +279,17 @@ void playGame(Question* questionHead,Player** playerHead, PlayedRound **playerRo
             printf("\nCongratulations! You completed all questions!\n");
         }
     }
-    
-    printf("Final score: %d\n", score);
+
+    printf("Total score: %.2f\n", totalScore);
+    printf("Correct answers: %d\n", score);
+
     /*
     NOTE:
     The difficulty and userID are hardcoded 
     please modify the call
     */
-    insertPlayedRound(playerRound, 1, 1, score);
+
+    insertPlayedRound(playerRound, difficulty , newPlayer->id, score);
 }
 
 /*
@@ -304,7 +307,7 @@ void freeQuestions(struct Question* questionHead) {
 /*
 Create the player round.
 */
-PlayedRound* createPlayedRound(int difficulty, int playerID, int points){
+PlayedRound* createPlayedRound(int difficulty, int playerID, int correctAnswers){
     PlayedRound *newRound = (PlayedRound*)malloc(sizeof(PlayedRound));
 	if (newRound == NULL) {
         printf("ERROR\n");
@@ -312,27 +315,27 @@ PlayedRound* createPlayedRound(int difficulty, int playerID, int points){
     }
 	newRound->difficulty = difficulty;
 	newRound->playerID = playerID; 
-	newRound->points = points;
+	newRound->correctAnswers = correctAnswers;
 	newRound->next = NULL; 
 	
 	return newRound;
 }
 
 /*
-Insert player round sorted by difficulty (1,2,3) and the points (ascending order).
+Insert player round sorted by difficulty (1,2,3) and the correctAnswers (ascending order).
 */
-void insertPlayedRound(PlayedRound **head, int difficulty, int playerID, int points){
-	PlayedRound *newRound = createPlayedRound(difficulty, playerID, points);  
+void insertPlayedRound(PlayedRound **head, int difficulty, int playerID, int correctAnswers){
+	PlayedRound *newRound = createPlayedRound(difficulty, playerID, correctAnswers);  
 	//Go through the list and find the position to insert the node
 	if(*head ==NULL || (*head)->difficulty > newRound->difficulty 
-	    							&& (*head)->points < newRound->points){
+	    							&& (*head)->correctAnswers < newRound->correctAnswers){
 		newRound->next = *head;
 		*head = newRound;
 		return; 
 	}
 	PlayedRound *current = *head;
 	while(current->next !=NULL && current->next->difficulty < newRound->difficulty 
-									&& current->next->points >= newRound->points){
+									&& current->next->correctAnswers >= newRound->correctAnswers){
 		current = current->next;
 	}
 	newRound->next = current->next;
@@ -347,9 +350,9 @@ void loadPlayedRoundsFromFile(PlayedRound** playedRoundHead) {
         printf("Warning: File not found or could not be opened.\n");
         return;
     }
-    int difficulty, playerID, points;
-    while (fscanf(file, "%d|%d|%d\n", &difficulty, &playerID, &points) == 3) {
-        insertPlayedRound(playedRoundHead, difficulty, playerID, points);
+    int difficulty, playerID, correctAnswers;
+    while (fscanf(file, "%d|%d|%d\n", &difficulty, &playerID, &correctAnswers) == 3) {
+        insertPlayedRound(playedRoundHead, difficulty, playerID, correctAnswers);
     }
     fclose(file);
     printf("Played rounds have been loaded successfully.\n");
@@ -364,7 +367,7 @@ void savePlayedRoundsToFile(PlayedRound* playedRoundHead){
     }
     PlayedRound* current = playedRoundHead;
     while (current != NULL) {
-        fprintf(file, "%d|%d|%d\n", current->difficulty, current->playerID, current->points);
+        fprintf(file, "%d|%d|%d\n", current->difficulty, current->playerID, current->correctAnswers);
         current = current->next;
     }
     fclose(file);
@@ -418,7 +421,7 @@ void displayPlayedRounds(PlayedRound* playedRoundHead) {
     // Sort the filtered rounds by score (descending)
     for (int i = 0; i < count - 1; i++) {
         for (int j = 0; j < count - i - 1; j++) {
-            if (filteredRounds[j]->points < filteredRounds[j + 1]->points) {
+            if (filteredRounds[j]->correctAnswers < filteredRounds[j + 1]->correctAnswers) {
                 PlayedRound* temp = filteredRounds[j];
                 filteredRounds[j] = filteredRounds[j + 1];
                 filteredRounds[j + 1] = temp;
@@ -443,7 +446,7 @@ void displayPlayedRounds(PlayedRound* playedRoundHead) {
         int end = start + roundsPerPage;
 
         for (int i = start; i < end && i < count; i++) {
-            printf("%d. Player ID: %d | Points: %d\n", i + 1, filteredRounds[i]->playerID, filteredRounds[i]->points);
+            printf("%d. Player ID: %d | correctAnswers: %d\n", i + 1, filteredRounds[i]->playerID, filteredRounds[i]->correctAnswers);
         }
 
         printf("==============================\n");
